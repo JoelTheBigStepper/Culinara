@@ -1,10 +1,10 @@
 
-import React from 'react';
+import React from "react";
 
 const Favorites = () => {
   const favoriteRecipes = [
-    { title: 'Avocado Toast', time: '10 mins', rating: 4.5 },
-    { title: 'Vegan Pancakes', time: '15 mins', rating: 4.8 },
+    { title: "Avocado Toast", time: "10 mins", rating: 4.5 },
+    { title: "Vegan Pancakes", time: "15 mins", rating: 4.8 },
   ];
 
   return (

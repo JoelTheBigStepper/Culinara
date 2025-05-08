@@ -1,15 +1,15 @@
 
-import React from 'react';
+import React from "react";
 
 const RecipeDetail = () => {
   const recipe = {
-    title: 'Avocado Toast',
-    author: 'Chef John',
-    time: '10 mins',
+    title: "Avocado Toast",
+    author: "Chef John",
+    time: "10 mins",
     rating: 4.5,
-    ingredients: ['Avocado', 'Toast', 'Lemon', 'Salt'],
-    steps: ['Toast the bread', 'Mash avocado', 'Spread on toast'],
-    nutrition: { calories: '200 kcal', protein: '5g' },
+    ingredients: ["Avocado", "Toast", "Lemon", "Salt"],
+    steps: ["Toast the bread", "Mash avocado", "Spread on toast"],
+    nutrition: { calories: "200 kcal", protein: "5g" },
   };
 
   return (

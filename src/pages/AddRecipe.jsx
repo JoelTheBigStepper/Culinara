@@ -1,14 +1,14 @@
 
-import React, { useState } from 'react';
+import React, { useState } from "react";
 
 const AddRecipe = () => {
-  const [title, setTitle] = useState('');
-  const [ingredients, setIngredients] = useState('');
-  const [steps, setSteps] = useState('');
+  const [title, setTitle] = useState("");
+  const [ingredients, setIngredients] = useState("");
+  const [steps, setSteps] = useState("");
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    alert('Recipe Added!');
+    alert("Recipe Added!");
   };
 
   return (

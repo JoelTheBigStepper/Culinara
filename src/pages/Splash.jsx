@@ -1,13 +1,17 @@
-import { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import myImage from '../assets/chef-logo.png';
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import myImage from "../assets/chef-logo.png";
+
+
+
+
 
 export default function Splash() {
   const navigate = useNavigate();
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      navigate('/home');
+      navigate("/home");
     }, 2000); // 2 seconds
 
     return () => clearTimeout(timer);

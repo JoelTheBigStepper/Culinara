@@ -1,41 +1,14 @@
-import { Link } from 'react-router-dom';
-import { Search, UserCircle, Plus } from 'lucide-react';
-import { useState } from 'react';
-import myImage from '../assets/chef-logo.png';
+import { Link } from "react-router-dom";
+import { Search, UserCircle, Plus } from "lucide-react";
+import { useState } from "react";
+import myImage from "../assets/chef-logo.png";
+
 
 const navItems = [
-  {
-    label: 'Recipes',
-    items: [
-      { name: 'All Recipes', path: '/recipes' },
-      { name: 'Trending', path: '/recipes/trending' },
-      { name: 'New', path: '/recipes/new' },
-    ],
-  },
-  {
-    label: 'Cuisines',
-    items: [
-      { name: 'Italian', path: '/cuisines/italian' },
-      { name: 'Indian', path: '/cuisines/indian' },
-      { name: 'Mexican', path: '/cuisines/mexican' },
-    ],
-  },
-  {
-    label: 'Categories',
-    items: [
-      { name: 'Vegan', path: '/categories/vegan' },
-      { name: 'Desserts', path: '/categories/desserts' },
-      { name: 'Quick Meals', path: '/categories/quick-meals' },
-    ],
-  },
-  {
-    label: 'Blog',
-    items: [
-      { name: 'Tips', path: '/blog/tips' },
-      { name: 'Stories', path: '/blog/stories' },
-      { name: 'Nutrition', path: '/blog/nutrition' },
-    ],
-  },
+  { label: "Recipes", items: ["All Recipes", "Trending", "New"] },
+  { label: "Cuisines", items: ["Italian", "Indian", "Mexican"] },
+  { label: "Categories", items: ["Vegan", "Desserts", "Quick Meals"] },
+  { label: "Blog", items: ["Tips", "Stories", "Nutrition"] },
 ];
 
 export default function Header() {
@@ -43,14 +16,14 @@ export default function Header() {
 
   return (
     <header className="bg-white shadow sticky top-0 z-50 w-full">
-      <div className="max-w-7xl mx-auto flex justify-between items-center px-4 py-3">
+      <div className="max-w-7xl mx-auto flex justify-between items-center px-4">
         {/* Logo */}
-        <Link to="/home" className="flex items-center text-xl font-bold text-pink-600">
-          <img
+        <Link to="/home" className="flex items-center text-xl font-bold text-red-600">
+        <img
             src={myImage}
             loading="lazy"
             alt="Culinara logo"
-            className="h-12 w-12 object-contain mr-2"
+           className="h-20 w-20"
           />
           <span>Culinara</span>
         </Link>
@@ -68,15 +41,15 @@ export default function Header() {
                 {label}
               </button>
               {hovered === label && (
-                <div className="absolute top-10 left-0 bg-white border shadow-md rounded-md py-2 w-44 z-50">
-                  {items.map(({ name, path }) => (
-                    <Link
-                      key={name}
-                      to={path}
+                <div className="absolute top-10 left-0 bg-white border shadow-md rounded-md py-2 w-40 z-50">
+                  {items.map((item) => (
+                    <a
+                      key={item}
+                      href="#"
                       className="block px-4 py-2 text-sm text-gray-700 hover:bg-[#FFEBD8]"
                     >
-                      {name}
-                    </Link>
+                      {item}
+                    </a>
                   ))}
                 </div>
               )}
@@ -90,7 +63,7 @@ export default function Header() {
           <UserCircle className="w-6 h-6 text-gray-600 hover:text-[#FF6F61] cursor-pointer" />
           <Link
             to="/add"
-            className="flex items-center px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition"
+            className="flex items-center px-3 py-2 bg-stone-200 text-black text-sm font-medium rounded hover:bg-red-600 hover:text-white transition"
           >
             <Plus className="w-4 h-4 mr-1" />
             Add Recipe

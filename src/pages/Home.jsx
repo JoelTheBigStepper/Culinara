@@ -1,42 +1,33 @@
-
-import React from 'react';
-
-const categories = ['Breakfast', 'Vegan', 'Desserts', 'Lunch', 'Dinner'];
-const recipes = [
-  { title: 'Avocado Toast', time: '10 mins', rating: 4.5 },
-  { title: 'Vegan Pancakes', time: '15 mins', rating: 4.8 },
-];
+import React from "react";
+import { Search } from "lucide-react";
+import myImage from "../assets/chef-logo.png";
+import bgImage from "../assets/background.jpg";
 
 const Home = () => {
   return (
-    <div className="container mx-auto px-4 py-6">
-      <div className="flex justify-between items-center mb-6">
-        <input
-          type="text"
-          placeholder="Search recipes..."
-          className="border border-gray-300 rounded-lg py-2 px-4 w-2/3"
-        />
-        <button className="bg-pink-600 text-white py-2 px-4 rounded-lg">Add recipe</button>
-      </div>
-      <div className="mb-6">
-        <h2 className="text-xl font-bold mb-4">Categories</h2>
-        <div className="flex space-x-4 overflow-x-auto">
-          {categories.map((category, index) => (
-            <div key={index} className="bg-gray-200 px-4 py-2 rounded-lg">{category}</div>
-          ))}
-        </div>
-      </div>
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        {recipes.map((recipe, index) => (
-          <div key={index} className="bg-white shadow-lg rounded-lg p-4">
-            <img src="https://via.placeholder.com/150" alt={recipe.title} className="w-full rounded-md" />
-            <h3 className="font-semibold text-lg mt-2">{recipe.title}</h3>
-            <div className="flex justify-between text-sm text-gray-600">
-              <span>{recipe.time}</span>
-              <span>⭐ {recipe.rating}</span>
+    <div>
+      <div
+        className="h-screen bg-cover bg-center flex items-center"
+        style={{ backgroundImage: `url(${bgImage})` }}
+      >
+        <div className="max-w-7xl mx-auto px-6 md:px-12 lg:px-24 w-full">
+          <div className="flex flex-col items-start space-y-6 bg-white/70 p-8 rounded-lg max-w-xl shadow-xl">
+            <div className="flex items-center space-x-4">
+              <img src={myImage} alt="Culinara logo" className="h-16 w-16 object-contain" />
+              <h1 className="text-4xl font-bold text-[#2E2E2E]">Bringing Flavor to Your Fingertips</h1>
+            </div>
+            <div className="flex w-full mt-4 rounded-md shadow-lg overflow-hidden">
+              <input
+                type="text"
+                placeholder="Search recipes, ingredients, cuisines..."
+                className="flex-grow px-6 py-4 text-lg outline-none bg-white"
+              />
+              <button className="bg-[#FF6F61] text-white w-16 flex items-center justify-center hover:bg-[#e05c4f] transition">
+                <Search className="w-6 h-6" />
+              </button>
             </div>
           </div>
-        ))}
+        </div>
       </div>
     </div>
   );
