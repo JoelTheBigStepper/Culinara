@@ -189,6 +189,14 @@ export default function AddRecipe() {
             <option value="Mexican">Mexican</option>
             <option value="Chinese">Chinese</option>
             <option value="American">American</option>
+            <option value="American">French</option>
+            <option value="American">German</option>
+            <option value="American">Greek</option>
+            <option value="American">Japanese</option>
+            <option value="American">Korean</option>
+            <option value="American">spanish</option>
+            <option value="American">Thai</option>
+            <option value="American">Brazilian</option>
             <option value="Other">Other</option>
           </select>
         </div>
