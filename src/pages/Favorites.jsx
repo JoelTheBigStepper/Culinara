@@ -1,29 +1,58 @@
+import React, { useEffect, useState } from "react";
 
-import React from "react";
+export default function MyRecipes() {
+  const [recipes, setRecipes] = useState([]);
 
-const Favorites = () => {
-  const favoriteRecipes = [
-    { title: "Avocado Toast", time: "10 mins", rating: 4.5 },
-    { title: "Vegan Pancakes", time: "15 mins", rating: 4.8 },
-  ];
+  useEffect(() => {
+    const stored = localStorage.getItem("recipes");
+    if (stored) {
+      setRecipes(JSON.parse(stored));
+    }
+  }, []);
 
   return (
-    <div className="container mx-auto px-4 py-6">
-      <h2 className="text-xl font-bold mb-4">My Favorites</h2>
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        {favoriteRecipes.map((recipe, index) => (
-          <div key={index} className="bg-white shadow-lg rounded-lg p-4">
-            <img src="https://via.placeholder.com/150" alt={recipe.title} className="w-full rounded-md" />
-            <h3 className="font-semibold text-lg mt-2">{recipe.title}</h3>
-            <div className="flex justify-between text-sm text-gray-600">
-              <span>{recipe.time}</span>
-              <span>⭐ {recipe.rating}</span>
+    <div className="max-w-6xl mx-auto px-4 py-8">
+      <h2 className="text-3xl font-bold mb-6">My Recipes</h2>
+      {recipes.length === 0 ? (
+        <p className="text-gray-600">No recipes found.</p>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {recipes.map((recipe, i) => (
+            <div
+              key={i}
+              className="bg-white shadow-md rounded-lg p-4 flex flex-col"
+            >
+              {recipe.image && (
+                <img
+                  src={recipe.image}
+                  alt={recipe.title}
+                  className="h-40 object-cover rounded mb-4"
+                />
+              )}
+              <h3 className="text-xl font-semibold mb-1">{recipe.title}</h3>
+              <p className="text-sm text-gray-500 mb-2">
+                Prep: {recipe.prepTime} | Cook: {recipe.cookTime}
+              </p>
+              <p className="text-sm text-gray-600 mb-4">
+                Difficulty: {recipe.difficulty}
+              </p>
+              <h4 className="font-bold">Ingredients:</h4>
+              <ul className="list-disc pl-5 text-sm mb-2">
+                {recipe.ingredients.map((ing, j) => (
+                  <li key={j}>{ing}</li>
+                ))}
+              </ul>
+              <h4 className="font-bold">Steps:</h4>
+              <ol className="list-decimal pl-5 text-sm">
+                {recipe.steps.map((step, j) => (
+                  <li key={j}>{step}</li>
+                ))}
+              </ol>
             </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
     </div>
   );
-};
+}
 
-export default Favorites;
