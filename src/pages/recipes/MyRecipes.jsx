@@ -47,18 +47,18 @@ export default function MyRecipes() {
             />
             <div className="p-4">
               <h3 className="font-semibold text-xl mt-1 mb-4 line-clamp-2">{recipe.title}</h3>
-              <div className="grid grid-cols-1 gap-1 text-sm text-gray-500">
+              <div className="grid grid-cols-2 gap-1 text-sm text-gray-500">
                 <div className="flex items-center gap-1">
-                  <Clock size={16} className="text-[#FF6F61]" />
-                  {recipe.cookTime}
+                  <Clock size={16} className="text-gray-400" />
+                  <p className="font-medium text-md hover:text-red-500"> {recipe.cookTime}</p>
                 </div>
                 <div className="flex items-center gap-1">
-                  <UtensilsCrossed size={16} className="text-[#FF6F61]" />
-                  {recipe.cuisine || "N/A"}
+                  <UtensilsCrossed size={16} className="text-gray-400" />
+                  <p className="font-medium text-md hover:text-red-500">{recipe.cuisine || "N/A"}</p>
                 </div>
                 <div className={`flex items-center gap-1 ${getDifficultyColor(recipe.difficulty)}`}>
-                  <ChefHat size={16} />
-                  {recipe.difficulty}
+                  <ChefHat size={20} />
+                  <p className="font-medium text-md">{recipe.difficulty}</p>
                 </div>
               </div>
             </div>
