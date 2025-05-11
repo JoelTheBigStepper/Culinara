@@ -46,7 +46,7 @@ export default function MyRecipes() {
               className="rounded-lg w-full h-72 object-cover"
             />
             <div className="p-4">
-              <h3 className="font-semibold text-xl mt-1 mb-4 line-clamp-2">{recipe.title}</h3>
+              <h3 className="font-semibold text-2xl hover:text-red-500 mt-1 mb-4 line-clamp-2">{recipe.title}</h3>
               <div className="grid grid-cols-2 gap-1 text-sm text-gray-500">
                 <div className="flex items-center gap-1">
                   <Clock size={16} className="text-gray-400" />
