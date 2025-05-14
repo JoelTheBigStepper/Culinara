@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 export default function AddRecipe() {
-  const navigate = useNavigate(); // <-- Initialize navigator
+  const navigate = useNavigate();
 
   const [title, setTitle] = useState('');
   const [image, setImage] = useState(null);
@@ -11,7 +11,8 @@ export default function AddRecipe() {
   const [prepTime, setPrepTime] = useState('');
   const [cookTime, setCookTime] = useState('');
   const [difficulty, setDifficulty] = useState('easy');
-  const [cuisine, setCuisine] = useState('Italian'); // New field
+  const [cuisine, setCuisine] = useState('Italian');
+  const [category, setCategory] = useState('Dessert'); // 🔥 NEW
 
   const handleIngredientChange = (index, value) => {
     const updated = [...ingredients];
@@ -30,7 +31,7 @@ export default function AddRecipe() {
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
-        setImage(reader.result); // base64 string
+        setImage(reader.result);
       };
       reader.readAsDataURL(file);
     }
@@ -49,6 +50,7 @@ export default function AddRecipe() {
       cookTime,
       difficulty,
       cuisine,
+      category, // 🔥 NEW
       createdAt: new Date().toISOString(),
     };
 
@@ -59,7 +61,6 @@ export default function AddRecipe() {
     alert('Recipe added successfully!');
     navigate('/recipes/my-recipes');
 
-    // Reset form
     setTitle('');
     setImage(null);
     setIngredients(['']);
@@ -68,6 +69,7 @@ export default function AddRecipe() {
     setCookTime('');
     setDifficulty('easy');
     setCuisine('Italian');
+    setCategory('Dessert'); // 🔥 Reset
   };
 
   return (
@@ -75,6 +77,7 @@ export default function AddRecipe() {
       <h2 className="text-3xl font-bold mb-6">Add a New Recipe</h2>
 
       <form className="space-y-6" onSubmit={handleSubmit}>
+        {/* Title */}
         <div>
           <label className="block text-sm font-medium">Title</label>
           <input
@@ -86,6 +89,7 @@ export default function AddRecipe() {
           />
         </div>
 
+        {/* Image */}
         <div>
           <label className="block text-sm font-medium">Image Upload</label>
           <input type="file" accept="image/*" onChange={handleImageChange} />
@@ -98,6 +102,7 @@ export default function AddRecipe() {
           )}
         </div>
 
+        {/* Ingredients */}
         <div>
           <label className="block text-sm font-medium">Ingredients</label>
           {ingredients.map((ing, i) => (
@@ -120,6 +125,7 @@ export default function AddRecipe() {
           </button>
         </div>
 
+        {/* Steps */}
         <div>
           <label className="block text-sm font-medium">Steps</label>
           {steps.map((step, i) => (
@@ -141,6 +147,7 @@ export default function AddRecipe() {
           </button>
         </div>
 
+        {/* Time */}
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium">Prep Time</label>
@@ -164,6 +171,7 @@ export default function AddRecipe() {
           </div>
         </div>
 
+        {/* Difficulty */}
         <div>
           <label className="block text-sm font-medium">Difficulty</label>
           <select
@@ -177,6 +185,7 @@ export default function AddRecipe() {
           </select>
         </div>
 
+        {/* Cuisine */}
         <div>
           <label className="block text-sm font-medium">Cuisine</label>
           <select
@@ -186,24 +195,44 @@ export default function AddRecipe() {
           >
             <option value="Italian">Italian</option>
             <option value="Indian">Indian</option>
-            <option value="Mexican">Mexican</option>
+            <option value="Nigerian">Nigerian</option>
             <option value="Chinese">Chinese</option>
             <option value="American">American</option>
-            <option value="American">French</option>
-            <option value="American">German</option>
-            <option value="American">Greek</option>
-            <option value="American">Japanese</option>
-            <option value="American">Korean</option>
-            <option value="American">spanish</option>
-            <option value="American">Thai</option>
-            <option value="American">Brazilian</option>
+            <option value="French">French</option>
+            <option value="German">German</option>
+            <option value="Greek">Greek</option>
+            <option value="Japanese">Japanese</option>
+            <option value="Korean">Korean</option>
+            <option value="Spanish">Spanish</option>
+            <option value="Thai">Thai</option>
+            <option value="Brazilian">Brazilian</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+
+        {/* 🔥 Category */}
+        <div>
+          <label className="block text-sm font-medium">Category</label>
+          <select
+            value={category}
+            onChange={(e) => setCategory(e.target.value)}
+            className="w-full border rounded px-4 py-2"
+          >
+            <option value="Dessert">Dessert</option>
+            <option value="Breakfast">Breakfast</option>
+            <option value="Lunch">Lunch</option>
+            <option value="Dinner">Dinner</option>
+            <option value="Snack">Snack</option>
+            <option value="Beverage">Beverage</option>
+            <option value="Appetizer">Appetizer</option>
+            <option value="Side Dish">Side Dish</option>
             <option value="Other">Other</option>
           </select>
         </div>
 
         <button
           type="submit"
-          className="px-6 py-3 bg-[#4CAF50] text-white rounded hover:bg-green-600"
+          className="px-6 py-3 bg-red-500 text-white rounded hover:bg-red-700"
         >
           Submit Recipe
         </button>

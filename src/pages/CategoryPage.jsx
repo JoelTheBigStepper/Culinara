@@ -1,17 +1,24 @@
-import { Link } from "react-router-dom";
+// src/pages/CategoryPage.jsx
+import { useParams, Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { Clock, UtensilsCrossed, ChefHat } from "lucide-react";
-// import { Clock, UtensilsCrossed, ChefHat } from "lucide-react";
 
-export default function MyRecipes() {
-  const [recipes, setRecipes] = useState([]);
+export default function CategoryPage() {
+  const { category } = useParams();
+  const [filteredRecipes, setFilteredRecipes] = useState([]);
 
   useEffect(() => {
-    const stored = JSON.parse(localStorage.getItem("recipes")) || [];
-    setRecipes(stored);
-  }, []);
+    const allRecipes = JSON.parse(localStorage.getItem("recipes")) || [];
+    const filtered = allRecipes.filter(
+      r => r.category?.toLowerCase() === category.toLowerCase()
+    );
+    setFilteredRecipes(filtered);
+  }, [category]);
 
- const getDifficultyColor = (level) => {
+  const formatCategory = (text) =>
+    text.charAt(0).toUpperCase() + text.slice(1).replace("-", " ");
+
+  const getDifficultyColor = (level) => {
   if (!level) return 'text-gray-400'; // fallback if difficulty is missing
 
   switch (level.toLowerCase()) {
@@ -23,19 +30,18 @@ export default function MyRecipes() {
       return 'text-red-600';
     default:
       return 'text-gray-400';
-  }
+    }
 };
 
-
-  if (recipes.length === 0) {
-    return <div className="text-center mt-10 text-lg text-gray-600">No recipes added yet.</div>;
-  }
-
   return (
-    <div className="max-w-6xl mx-auto px-4 py-8">
-      <h2 className="text-3xl font-bold mb-6">My Recipes</h2>
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-        {recipes.map((recipe) => (
+    <div className="max-w-7xl mx-auto px-4 py-8">
+      <h2 className="text-3xl font-bold mb-6">{formatCategory(category)} Recipes</h2>
+
+      {filteredRecipes.length === 0 ? (
+        <p className="text-gray-500">No recipes found in this category.</p>
+      ) : (
+       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+        {filteredRecipes.map(recipe => (
           <Link
             key={recipe.id}
             to={`/recipe/${recipe.id}`}
@@ -66,6 +72,7 @@ export default function MyRecipes() {
           </Link>
         ))}
       </div>
+      )}
     </div>
   );
 }

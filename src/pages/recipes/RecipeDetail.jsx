@@ -92,7 +92,7 @@ export default function RecipeDetail() {
         {/* Back Button */}
         <div className="mt-8">
           <Link
-            to="/my-recipes"
+            to="/recipes/my-recipes"
             className="inline-block bg-[#FF6F61] text-white px-6 py-3 rounded hover:bg-[#e85b50] transition"
           >
             ← Back to My Recipes

@@ -17,15 +17,22 @@ const navItems = [
     label: "Cuisines",
     items: [
       { name: "Italian", path: "/cuisines/italian" },
-      { name: "Indian", path: "/cuisines/indian" },
-      { name: "Mexican", path: "/cuisines/mexican" }
+      { name: "Nigerian", path: "/cuisines/nigerian" },
+      { name: "American", path: "/cuisines/american" },
+      { name: "French", path: "/cuisines/french" },
+      { name: "Mexican", path: "/cuisines/mexican" },
+      { name: "Thai", path: "/cuisines/thai" }
     ]
   },
   {
     label: "Categories",
     items: [
       { name: "Vegan", path: "/categories/vegan" },
-      { name: "Desserts", path: "/categories/desserts" },
+      { name: "Dessert", path: "/categories/dessert" },
+      { name: "Breakfast", path: "/categories/breakfast" },
+      { name: "Lunch", path: "/categories/lunch" },
+      { name: "Dinner", path: "/categories/dinner" },
+      { name: "Appetizer", path: "/categories/appetizer" },
       { name: "Quick Meals", path: "/categories/quick-meals" }
     ]
   },

@@ -1,17 +1,14 @@
-import { Link } from "react-router-dom";
+// src/pages/CuisinePage.jsx
+import { useParams, Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { Clock, UtensilsCrossed, ChefHat } from "lucide-react";
-// import { Clock, UtensilsCrossed, ChefHat } from "lucide-react";
 
-export default function MyRecipes() {
-  const [recipes, setRecipes] = useState([]);
+export default function CuisinePage() {
 
-  useEffect(() => {
-    const stored = JSON.parse(localStorage.getItem("recipes")) || [];
-    setRecipes(stored);
-  }, []);
+const { cuisine } = useParams();
+const [filteredRecipes, setFilteredRecipes] = useState([]);
 
- const getDifficultyColor = (level) => {
+const getDifficultyColor = (level) => {
   if (!level) return 'text-gray-400'; // fallback if difficulty is missing
 
   switch (level.toLowerCase()) {
@@ -27,15 +24,23 @@ export default function MyRecipes() {
 };
 
 
-  if (recipes.length === 0) {
-    return <div className="text-center mt-10 text-lg text-gray-600">No recipes added yet.</div>;
-  }
+  useEffect(() => {
+    const allRecipes = JSON.parse(localStorage.getItem("recipes")) || [];
+    const filtered = allRecipes.filter(
+      r => r.cuisine?.toLowerCase() === cuisine.toLowerCase()
+    );
+    setFilteredRecipes(filtered);
+  }, [cuisine]);
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-8">
-      <h2 className="text-3xl font-bold mb-6">My Recipes</h2>
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-        {recipes.map((recipe) => (
+    <div className="max-w-7xl mx-auto px-4 py-8">
+      <h2 className="text-3xl font-bold mb-6 capitalize">{cuisine} Recipes</h2>
+
+      {filteredRecipes.length === 0 ? (
+        <p className="text-gray-500">No recipes found for this cuisine.</p>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+            {filteredRecipes.map(recipe => (
           <Link
             key={recipe.id}
             to={`/recipe/${recipe.id}`}
@@ -62,10 +67,11 @@ export default function MyRecipes() {
                   <p className="font-medium text-md">{recipe.difficulty}</p>
                 </div>
               </div>
-            </div>
-          </Link>
-        ))}
-      </div>
+              </div>
+            </Link>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
