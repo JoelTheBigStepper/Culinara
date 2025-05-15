@@ -5,6 +5,7 @@ import Home from "./pages/Home";
 import RecipeDetail from "./pages/recipes/RecipeDetail";
 import AddRecipe from "./pages/AddRecipe";
 import MyRecipes from "./pages/recipes/MyRecipes";
+import AllRecipes from './pages/recipes/AllRecipes';
 import Favorites from "./pages/Favorites";
 import Profile from "./pages/Profile";
 import Header from "./components/Header";
@@ -24,6 +25,7 @@ export default function App() {
           <Route path="/recipe/:id" element={<RecipeDetail />} />
           <Route path="/add" element={<AddRecipe />} />
           <Route path="/recipes/my-recipes" element={<MyRecipes />} />
+          <Route path="/recipes/all" element={<AllRecipes />} />
           <Route path="/favorites" element={<Favorites />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/cuisines/:cuisine" element={<CuisinePage />} />

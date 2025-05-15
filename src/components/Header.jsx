@@ -7,7 +7,7 @@ const navItems = [
   {
     label: "Recipes",
     items: [
-      { name: "All Recipes", path: "/home" },
+      { name: "All Recipes", path: "/recipes/all" },
       { name: "Trending", path: "/recipes/trending" },
       { name: "New", path: "/recipes/new" },
       { name: "My Recipes", path: "/recipes/my-recipes" } 
