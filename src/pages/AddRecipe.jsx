@@ -59,7 +59,7 @@ export default function AddRecipe() {
     localStorage.setItem('recipes', JSON.stringify(updated));
 
     alert('Recipe added successfully!');
-    navigate('/recipes/my-recipes');
+    navigate('/recipes/new');
 
     setTitle('');
     setImage(null);
