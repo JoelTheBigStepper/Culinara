@@ -13,6 +13,20 @@ export default function RecipeDetail() {
     setRecipe(found);
   }, [id]);
 
+  useEffect(() => {
+    const recipes = JSON.parse(localStorage.getItem("recipes")) || [];
+    const updated = recipes.map(recipe => {
+      if (recipe.id === parseInt(id)) {
+        return {
+          ...recipe,
+          views: (recipe.views || 0) + 1, // Increment views
+        };
+      }
+      return recipe;
+    });
+    localStorage.setItem("recipes", JSON.stringify(updated));
+  }, [id]);
+
   const getDifficultyColor = (level) => {
     switch (level?.toLowerCase()) {
       case 'easy': return 'text-green-600';
