@@ -1,70 +1,60 @@
-import { useState } from 'react';
+import {  useEffect, useState } from 'react';
+import { Link } from "react-router-dom";
+
 import { Heart, Bookmark } from 'lucide-react';
-import pastaImg from '../assets/pasta.jpg';
-import quinoaImg from '../assets/quinoa.jpg';
-import beefImg from '../assets/beef.jpg';
-import pancakesImg from '../assets/pancakes.jpg';
-import cakeImg from '../assets/cake.jpg';
 
 
 const tabs = ['Latest Recipes', 'Most Popular Recipes', 'Fastest Recipes', "Editor's Choice"];
 
-const recipes = [
-  {
-    id: 1,
-    title: 'Creamy Garlic Mushroom Penne Pasta',
-    category: 'Pasta',
-    image: pastaImg,
-    rating: 4.8,
-    time: '5 min',
-    cuisine: 'Lebanese',
-    level: 'Beginner',
-  },
-  {
-    id: 2,
-    title: 'Zesty Lemon Quinoa with Fresh Herbs',
-    category: 'Salads',
-    image: quinoaImg,
-    rating: 4.5,
-    time: '60 min',
-    cuisine: 'Moroccan',
-    level: 'Beginner',
-  },
-  {
-    id: 3,
-    title: 'Smoky Barbecue Pulled Beef Sandwiches',
-    category: 'Meat',
-    image: beefImg,
-    rating: 4.8,
-    time: '15 min',
-    cuisine: 'French',
-    level: 'Easy',
-  },
-  {
-    id: 4,
-    title: 'Fluffy Banana Pancakes with Maple Syrup',
-    category: 'Breakfasts',
-    image: pancakesImg,
-    rating: 4.8,
-    time: '60 min',
-    cuisine: 'Thai',
-    level: 'Advanced',
-  },
-  {
-    id: 5,
-    title: 'Molten Chocolate Lava Cake Des',
-    category: 'Desserts',
-    image: cakeImg,
-    rating: 4.6,
-    time: '80 min',
-    cuisine: 'Ethiopian',
-    level: 'Advanced',
-  },
-];
 
 export default function RecipeSection() {
   const [activeTab, setActiveTab] = useState(tabs[0]);
 
+  const [recipes, setRecipes] = useState([]);
+    const [interactionData, setInteractionData] = useState({}); // { [id]: { likes, shares } }
+  
+    // Load recipes and interactions
+    useEffect(() => {
+      const allRecipes = JSON.parse(localStorage.getItem("recipes")) || [];
+  
+      const savedInteractions = JSON.parse(localStorage.getItem("interactions")) || {};
+  
+      const withEngagement = allRecipes.map((recipe) => {
+        const { likes = 0, shares = 0 } = savedInteractions[recipe.id] || {};
+        return { ...recipe, likes, shares };
+      });
+  
+      const sorted = withEngagement.sort(
+        (a, b) => (b.likes + b.shares) - (a.likes + a.shares)
+      );
+  
+      setRecipes(sorted);
+      setInteractionData(savedInteractions);
+    }, []);
+  
+    const updateInteraction = (id, type) => {
+      const updated = {
+        ...interactionData,
+        [id]: {
+          likes: interactionData[id]?.likes || 0,
+          shares: interactionData[id]?.shares || 0,
+          [type]: (interactionData[id]?.[type] || 0) + 1
+        }
+      };
+  
+      setInteractionData(updated);
+      localStorage.setItem("interactions", JSON.stringify(updated));
+  
+      // Also update the display
+      const newRecipes = recipes.map((r) =>
+        r.id === id ? { ...r, ...updated[id] } : r
+      );
+      const sorted = newRecipes.sort(
+        (a, b) => (b.likes + b.shares) - (a.likes + a.shares)
+      );
+      setRecipes(sorted);
+    };
+  
   return (
     <section className="max-w-7xl mx-auto p-4 mt-10">
       <div className="flex items-center space-x-6 border-b mb-6">
@@ -84,7 +74,11 @@ export default function RecipeSection() {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
-        {recipes.map((recipe) => (
+        {recipes.length === 0 ? (
+        <p className="text-gray-500">No trending recipes available.</p>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          {recipes.map((recipe) => (
           <div
             key={recipe.id}
             className="bg-white rounded-xl shadow hover:shadow-lg transition p-2 relative"
@@ -92,11 +86,9 @@ export default function RecipeSection() {
             <div className="absolute top-2 left-2 bg-yellow-400 text-white text-sm px-2 py-0.5 rounded font-bold shadow">
               ★ {recipe.rating}
             </div>
-            <img
-              src={recipe.image}
-              alt={recipe.title}
-              className="rounded-lg w-full h-40 object-cover"
-            />
+           <Link to={`/recipe/${recipe.id}`}>
+              <img src={recipe.image} alt={recipe.title} className="w-full h-48 object-cover" />
+            </Link>
             <div className="absolute top-2 right-2 space-y-1 flex flex-col items-end">
               <Heart className="w-5 h-5 text-red-500 bg-white/70 rounded-full p-1 cursor-pointer hover:text-white hover:bg-red-500" />
               <Bookmark className="w-5 h-5 text-red-500 bg-white/70 rounded-full p-1 cursor-pointer hover:text-white hover:bg-red-500" />
@@ -114,6 +106,8 @@ export default function RecipeSection() {
             </div>
           </div>
         ))}
+        </div>
+      )}
       </div>
     </section>
   );

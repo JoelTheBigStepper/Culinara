@@ -1,6 +1,6 @@
 import React from "react";
 import { Search } from "lucide-react";
-// import RecipeSection from "../components/RecipeSection";
+import RecipeSection from "../components/RecipeSection";
 import myImage from "../assets/chef-logo.png";
 import bgImage from "../assets/background.jpg";
 
@@ -30,7 +30,7 @@ const Home = () => {
           </div>
         </div>
       </div>
-      {/* <RecipeSection/> */}
+      <RecipeSection/>
     </div>
   );
 };
