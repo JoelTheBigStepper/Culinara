@@ -13,6 +13,7 @@ import Profile from "./pages/Profile";
 import Header from "./components/Header";
 import CuisinePage from './pages/CuisinePage';
 import CategoryPage from './pages/CategoryPage';
+import SearchResults from './pages/SearchResults';
 
 import "./App.css";
 
@@ -34,6 +35,7 @@ export default function App() {
           <Route path="/profile" element={<Profile />} />
           <Route path="/cuisines/:cuisine" element={<CuisinePage />} />
           <Route path="/categories/:category" element={<CategoryPage />} />
+          <Route path="/search" element={<SearchResults />} />
         </Routes>
         
       </div>

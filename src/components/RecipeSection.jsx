@@ -149,4 +149,3 @@ export default function RecipeSection() {
     </section>
   );
 }
-git 
