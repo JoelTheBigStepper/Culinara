@@ -1,7 +1,7 @@
 // src/pages/recipes/AllRecipes.jsx
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
-import { Clock, UtensilsCrossed, ChefHat } from "lucide-react";
+// import { Link } from "react-router-dom";
+import RecipeCard from "../../components/RecipeCard";
 
 export default function AllRecipes() {
   const [recipes, setRecipes] = useState([]);
@@ -15,37 +15,38 @@ export default function AllRecipes() {
     setRecipes(stored);
   }, []);
 
-  const getDifficultyColor = (level) => {
-    if (!level) return "text-gray-400";
-    switch (level.toLowerCase()) {
-      case "easy":
-        return "text-green-600";
-      case "moderate":
-        return "text-yellow-600";
-      case "hard":
-        return "text-red-600";
-      default:
-        return "text-gray-400";
-    }
-  };
-
   const handleFilter = (recipe) => {
-    const matchesSearch =
-      recipe.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      recipe.ingredients?.join(", ").toLowerCase().includes(searchQuery.toLowerCase()) ||
-      recipe.cuisine?.toLowerCase().includes(searchQuery.toLowerCase());
+  const matchesSearch =
+    recipe.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    recipe.ingredients?.join(", ").toLowerCase().includes(searchQuery.toLowerCase()) ||
+    recipe.cuisine?.toLowerCase().includes(searchQuery.toLowerCase());
 
-    const matchesCuisine = filterCuisine === "All" || recipe.cuisine === filterCuisine;
-    const matchesDifficulty = filterDifficulty === "All" || recipe.difficulty === filterDifficulty;
+  const matchesCuisine =
+    filterCuisine === "All" || recipe.cuisine?.toLowerCase() === filterCuisine.toLowerCase();
 
-    return matchesSearch && matchesCuisine && matchesDifficulty;
-  };
+  const matchesDifficulty =
+    filterDifficulty === "All" ||
+    (recipe.difficulty && recipe.difficulty.toLowerCase() === filterDifficulty.toLowerCase());
+
+  return matchesSearch && matchesCuisine && matchesDifficulty;
+};
+
 
   const sortedFilteredRecipes = () => {
     let filtered = recipes.filter(handleFilter);
 
-    if (sortOrder === "latest") {
-      filtered.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    switch (sortOrder) {
+      case "latest":
+        filtered.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+        break;
+      case "cookTimeAsc":
+        filtered.sort((a, b) => parseInt(a.cookTime) - parseInt(b.cookTime));
+        break;
+      case "cookTimeDesc":
+        filtered.sort((a, b) => parseInt(b.cookTime) - parseInt(a.cookTime));
+        break;
+      default:
+        break;
     }
 
     return filtered;
@@ -98,6 +99,8 @@ export default function AllRecipes() {
           className="border px-3 py-2 rounded-md"
         >
           <option value="latest">Newest First</option>
+          <option value="cookTimeAsc">Cook Time: Low to High</option>
+          <option value="cookTimeDesc">Cook Time: High to Low</option>
         </select>
       </div>
 
@@ -107,36 +110,7 @@ export default function AllRecipes() {
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {sortedFilteredRecipes().map((recipe) => (
-            <Link
-              key={recipe.id}
-              to={`/recipe/${recipe.id}`}
-              className="bg-white rounded-xl transition p-2 relative shadow-sm hover:shadow-md"
-            >
-              <img
-                src={recipe.image}
-                alt={recipe.title}
-                className="rounded-lg w-full h-72 object-cover"
-              />
-              <div className="p-4">
-                <h3 className="font-semibold text-2xl hover:text-red-500 mt-1 mb-4 line-clamp-2">
-                  {recipe.title}
-                </h3>
-                <div className="grid grid-cols-2 gap-1 text-sm text-gray-500">
-                  <div className="flex items-center gap-1">
-                    <Clock size={16} className="text-gray-400" />
-                    <p className="font-medium text-md hover:text-red-500">{recipe.cookTime}</p>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <UtensilsCrossed size={16} className="text-gray-400" />
-                    <p className="font-medium text-md hover:text-red-500">{recipe.cuisine || "N/A"}</p>
-                  </div>
-                  <div className={`flex items-center gap-1 ${getDifficultyColor(recipe.difficulty)}`}>
-                    <ChefHat size={20} />
-                    <p className="font-medium text-md">{recipe.difficulty}</p>
-                  </div>
-                </div>
-              </div>
-            </Link>
+            <RecipeCard key={recipe.id} recipe={recipe} />
           ))}
         </div>
       )}

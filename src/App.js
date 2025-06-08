@@ -1,6 +1,9 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Splash from "./pages/Splash";
 import Home from "./pages/Home";
+import SignUp from "./pages/SignUp";
+import SignIn from "./pages/SignIn";
+import EditProfile from "./pages/EditProfile";
 // import RecipeSection from "./components/RecipeSection";
 import RecipeDetail from "./pages/recipes/RecipeDetail";
 import AddRecipe from "./pages/AddRecipe";
@@ -25,6 +28,9 @@ export default function App() {
         <Routes>
           <Route path="/" element={<Splash />} />
           <Route path="/home" element={<Home />} />
+          <Route path="/signup" element={<SignUp/>}/>
+          <Route path="/signin" element={<SignIn/>}/>
+          <Route path="/edit-profile" element={<EditProfile/>}/>
           <Route path="/recipe/:id" element={<RecipeDetail />} />
           <Route path="/add" element={<AddRecipe />} />
           <Route path="/recipes/my-recipes" element={<MyRecipes />} />

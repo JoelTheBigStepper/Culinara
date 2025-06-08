@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { getCurrentUser } from "../utils/authUtils";
 
 export default function AddRecipe() {
   const navigate = useNavigate();
@@ -38,39 +39,47 @@ export default function AddRecipe() {
   };
 
   const handleSubmit = (e) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    const newRecipe = {
-      id: Date.now(),
-      title,
-      image,
-      ingredients,
-      steps,
-      prepTime,
-      cookTime,
-      difficulty,
-      cuisine,
-      category, // 🔥 NEW
-      createdAt: new Date().toISOString(),
-    };
+  const currentUser = getCurrentUser();
+  if (!currentUser) {
+    alert("You must be signed in to add a recipe.");
+    return navigate("/signin");
+  }
 
-    const existing = JSON.parse(localStorage.getItem('recipes')) || [];
-    const updated = [...existing, newRecipe];
-    localStorage.setItem('recipes', JSON.stringify(updated));
-
-    alert('Recipe added successfully!');
-    navigate('/recipes/new');
-
-    setTitle('');
-    setImage(null);
-    setIngredients(['']);
-    setSteps(['']);
-    setPrepTime('');
-    setCookTime('');
-    setDifficulty('easy');
-    setCuisine('Italian');
-    setCategory('Dessert'); // 🔥 Reset
+  const newRecipe = {
+    id: Date.now(),
+    title,
+    image,
+    ingredients,
+    steps,
+    prepTime,
+    cookTime,
+    difficulty,
+    cuisine,
+    category,
+    userId: currentUser.id, // ✅ Tie recipe to logged-in user
+    createdAt: new Date().toISOString(),
   };
+
+  const existing = JSON.parse(localStorage.getItem("recipes")) || [];
+  const updated = [...existing, newRecipe];
+  localStorage.setItem("recipes", JSON.stringify(updated));
+
+  alert("Recipe added successfully!");
+  navigate("/recipes/new");
+
+  // Reset form
+  setTitle("");
+  setImage(null);
+  setIngredients([""]);
+  setSteps([""]);
+  setPrepTime("");
+  setCookTime("");
+  setDifficulty("easy");
+  setCuisine("Italian");
+  setCategory("Dessert");
+};
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-8">

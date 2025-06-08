@@ -1,15 +1,20 @@
 import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { Clock, UtensilsCrossed, ChefHat } from "lucide-react";
-// import { Clock, UtensilsCrossed, ChefHat } from "lucide-react";
+import { getCurrentUser } from "../../utils/authUtils";
 
 export default function MyRecipes() {
   const [recipes, setRecipes] = useState([]);
 
-  useEffect(() => {
-    const stored = JSON.parse(localStorage.getItem("recipes")) || [];
-    setRecipes(stored);
-  }, []);
+useEffect(() => {
+  const currentUser = getCurrentUser();
+  if (!currentUser) return;
+
+  const stored = JSON.parse(localStorage.getItem("recipes")) || [];
+  const userRecipes = stored.filter(recipe => recipe.userId === currentUser.id);
+  setRecipes(userRecipes);
+}, []);
+
 
  const getDifficultyColor = (level) => {
   if (!level) return 'text-gray-400'; // fallback if difficulty is missing

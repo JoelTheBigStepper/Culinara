@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
-import { Heart, Bookmark } from "lucide-react";
+// import { Link } from "react-router-dom";    
+// import { Heart, Bookmark } from "lucide-react";
+import RecipeCard from "../../components/RecipeCard";
 
 export default function TrendingRecipes() {
   const [recipes, setRecipes] = useState([]);
@@ -53,58 +54,15 @@ export default function TrendingRecipes() {
 
       {recipes.length === 0 ? (
         <p className="text-gray-500">No trending recipes available.</p>
-      ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
+        ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
           {recipes.map((recipe) => (
-            <div
-              key={recipe.id}
-              className="bg-white rounded-xl shadow hover:shadow-lg transition p-2 relative"
-            >
-              {/* Rating badge */}
-              <div className="absolute top-2 left-2 bg-yellow-400 text-white text-sm px-2 py-0.5 rounded font-bold shadow">
-                ★ {recipe.rating}
-              </div>
-
-              {/* Like & Share buttons */}
-              <div className="absolute top-2 right-2 space-y-1 flex flex-col items-end">
-                <Heart
-                  className="w-5 h-5 text-red-500 bg-white/70 rounded-full p-1 cursor-pointer hover:text-white hover:bg-red-500"
-                  onClick={() => updateInteraction(recipe.id, "likes")}
-                />
-                <Bookmark
-                  className="w-5 h-5 text-red-500 bg-white/70 rounded-full p-1 cursor-pointer hover:text-white hover:bg-red-500"
-                  onClick={() => updateInteraction(recipe.id, "shares")}
-                />
-              </div>
-
-              {/* Image */}
-              <Link to={`/recipe/${recipe.id}`}>
-                <img
-                  src={recipe.image}
-                  alt={recipe.title}
-                  className="w-full h-48 object-cover rounded"
-                />
-              </Link>
-
-              {/* Info Section */}
-              <div className="mt-3 px-1">
-                <div className="text-xs text-red-600 font-semibold">
-                  {recipe.category}
-                </div>
-                <h3 className="font-semibold text-sm mt-1 line-clamp-2">
-                  {recipe.title}
-                </h3>
-                <div className="mt-2 text-xs text-gray-500 flex flex-wrap gap-2">
-                  <span>⏱ {recipe.time}</span>
-                  <span>🌍 {recipe.cuisine}</span>
-                  <span>📘 {recipe.level}</span>
-                </div>
-                <div className="mt-1 text-xs text-gray-400 flex gap-3">
-                  <span>❤️ {recipe.likes}</span>
-                  <span>🔄 {recipe.shares}</span>
-                </div>
-              </div>
-            </div>
+            <RecipeCard
+            key={recipe.id}
+            recipe={recipe}
+            onLike={(id) => updateInteraction(id, "likes")}
+            onShare={(id) => updateInteraction(id, "shares")}
+            />
           ))}
         </div>
       )}
