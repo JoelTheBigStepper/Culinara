@@ -1,6 +1,5 @@
-// src/pages/recipes/AllRecipes.jsx
 import { useEffect, useState } from "react";
-// import { Link } from "react-router-dom";
+import { Link } from "react-router-dom";
 import RecipeCard from "../../components/RecipeCard";
 
 export default function AllRecipes() {
@@ -16,21 +15,20 @@ export default function AllRecipes() {
   }, []);
 
   const handleFilter = (recipe) => {
-  const matchesSearch =
-    recipe.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    recipe.ingredients?.join(", ").toLowerCase().includes(searchQuery.toLowerCase()) ||
-    recipe.cuisine?.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesSearch =
+      recipe.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      recipe.ingredients?.join(", ").toLowerCase().includes(searchQuery.toLowerCase()) ||
+      recipe.cuisine?.toLowerCase().includes(searchQuery.toLowerCase());
 
-  const matchesCuisine =
-    filterCuisine === "All" || recipe.cuisine?.toLowerCase() === filterCuisine.toLowerCase();
+    const matchesCuisine =
+      filterCuisine === "All" || recipe.cuisine?.toLowerCase() === filterCuisine.toLowerCase();
 
-  const matchesDifficulty =
-    filterDifficulty === "All" ||
-    (recipe.difficulty && recipe.difficulty.toLowerCase() === filterDifficulty.toLowerCase());
+    const matchesDifficulty =
+      filterDifficulty === "All" ||
+      (recipe.difficulty && recipe.difficulty.toLowerCase() === filterDifficulty.toLowerCase());
 
-  return matchesSearch && matchesCuisine && matchesDifficulty;
-};
-
+    return matchesSearch && matchesCuisine && matchesDifficulty;
+  };
 
   const sortedFilteredRecipes = () => {
     let filtered = recipes.filter(handleFilter);
@@ -57,22 +55,22 @@ export default function AllRecipes() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
-      <h2 className="text-3xl font-bold mb-6">All Recipes</h2>
+      <h2 className="text-3xl font-bold mb-6 text-center sm:text-left">All Recipes</h2>
 
       {/* Controls */}
-      <div className="flex flex-wrap gap-4 mb-6 items-center">
+      <div className="flex flex-col sm:flex-row sm:flex-wrap gap-4 mb-6 items-stretch sm:items-center">
         <input
           type="text"
           placeholder="Search by title, ingredient, or cuisine..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="border border-gray-300 px-3 py-2 rounded-md w-full sm:w-72"
+          className="border border-gray-300 px-3 py-2 rounded-md w-full sm:w-64"
         />
 
         <select
           value={filterCuisine}
           onChange={(e) => setFilterCuisine(e.target.value)}
-          className="border px-3 py-2 rounded-md"
+          className="border px-3 py-2 rounded-md w-full sm:w-48"
         >
           {uniqueCuisines.map((cuisine) => (
             <option key={cuisine} value={cuisine}>
@@ -84,7 +82,7 @@ export default function AllRecipes() {
         <select
           value={filterDifficulty}
           onChange={(e) => setFilterDifficulty(e.target.value)}
-          className="border px-3 py-2 rounded-md"
+          className="border px-3 py-2 rounded-md w-full sm:w-48"
         >
           {difficulties.map((level) => (
             <option key={level} value={level}>
@@ -96,7 +94,7 @@ export default function AllRecipes() {
         <select
           value={sortOrder}
           onChange={(e) => setSortOrder(e.target.value)}
-          className="border px-3 py-2 rounded-md"
+          className="border px-3 py-2 rounded-md w-full sm:w-56"
         >
           <option value="latest">Newest First</option>
           <option value="cookTimeAsc">Cook Time: Low to High</option>
