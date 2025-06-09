@@ -54,23 +54,23 @@ export default function AllRecipes() {
   const difficulties = ["All", "Easy", "Moderate", "Hard"];
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <h2 className="text-3xl font-bold mb-6 text-center sm:text-left">All Recipes</h2>
 
-      {/* Controls */}
+      {/* Filters & Sorting */}
       <div className="flex flex-col sm:flex-row sm:flex-wrap gap-4 mb-6 items-stretch sm:items-center">
         <input
           type="text"
           placeholder="Search by title, ingredient, or cuisine..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="border border-gray-300 px-3 py-2 rounded-md w-full sm:w-64"
+          className="border border-gray-300 px-3 py-2 rounded-md w-full sm:w-60"
         />
 
         <select
           value={filterCuisine}
           onChange={(e) => setFilterCuisine(e.target.value)}
-          className="border px-3 py-2 rounded-md w-full sm:w-48"
+          className="border px-3 py-2 rounded-md w-full sm:w-40"
         >
           {uniqueCuisines.map((cuisine) => (
             <option key={cuisine} value={cuisine}>
@@ -104,7 +104,7 @@ export default function AllRecipes() {
 
       {/* Recipe Grid */}
       {sortedFilteredRecipes().length === 0 ? (
-        <p className="text-gray-500">No recipes match your criteria.</p>
+        <p className="text-gray-500 text-center">No recipes match your criteria.</p>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {sortedFilteredRecipes().map((recipe) => (

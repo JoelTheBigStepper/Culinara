@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
-import { Search, UserCircle, Plus, Bookmark, Menu, X } from "lucide-react";
+import { Search, UserCircle, Plus, Bookmark, Menu, X, ChevronDown } from "lucide-react";
 import myImage from "../assets/chef-logo.png";
 
 const navItems = [
@@ -49,10 +49,18 @@ const navItems = [
 export default function Header() {
   const [openDropdown, setOpenDropdown] = useState(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [mobileDropdowns, setMobileDropdowns] = useState({});
   const containerRef = useRef(null);
 
   const toggleDropdown = (label) => {
     setOpenDropdown((prev) => (prev === label ? null : label));
+  };
+
+  const toggleMobileDropdown = (label) => {
+    setMobileDropdowns((prev) => ({
+      ...prev,
+      [label]: !prev[label],
+    }));
   };
 
   useEffect(() => {
@@ -67,25 +75,26 @@ export default function Header() {
 
   return (
     <header className="bg-white shadow sticky top-0 z-50 w-full">
-      <div className="max-w-7xl mx-auto flex justify-between items-center px-4 py-2" ref={containerRef}>
+      <div className="max-w-7xl mx-auto px-4 py-3 md:px-6 flex justify-between items-center" ref={containerRef}>
         {/* Logo */}
         <Link to="/home" className="flex items-center text-xl font-bold text-red-600">
           <img src={myImage} alt="Culinara logo" className="h-12 w-12 sm:h-16 sm:w-16" />
-          <span className="ml-1 text-lg sm:text-xl">Culinara</span>
+          <span className="ml-2 text-xl">Culinara</span>
         </Link>
 
         {/* Desktop Nav */}
-        <nav className="hidden md:flex space-x-6 relative">
+        <nav className="hidden md:flex items-center space-x-6 relative">
           {navItems.map(({ label, items }) => (
             <div key={label} className="relative">
               <button
                 onClick={() => toggleDropdown(label)}
-                className="text-gray-800 hover:text-[#FF6F61] font-medium"
+                className="flex items-center text-gray-800 hover:text-[#FF6F61] font-medium"
               >
                 {label}
+                <ChevronDown className="w-4 h-4 ml-1" />
               </button>
               {openDropdown === label && (
-                <div className="absolute left-0 mt-2 w-44 bg-white border rounded-md shadow-md py-2 z-50">
+                <div className="absolute top-full left-0 mt-2 w-48 bg-white border rounded shadow-md py-2 z-50">
                   {items.map(({ name, path }) => (
                     <Link
                       key={name}
@@ -102,14 +111,14 @@ export default function Header() {
           ))}
         </nav>
 
-        {/* Right Icons */}
+        {/* Desktop Actions */}
         <div className="hidden md:flex items-center space-x-4">
           <Link to="/favorites">
-            <Bookmark className="w-5 h-5 text-gray-600 hover:text-red-500 cursor-pointer" />
+            <Bookmark className="w-5 h-5 text-gray-600 hover:text-red-500" />
           </Link>
-          <Search className="w-5 h-5 text-gray-600 hover:text-red-500 cursor-pointer" />
+          <Search className="w-5 h-5 text-gray-600 hover:text-red-500" />
           <Link to="/profile">
-            <UserCircle className="w-6 h-6 text-gray-600 hover:text-red-500 cursor-pointer" />
+            <UserCircle className="w-6 h-6 text-gray-600 hover:text-red-500" />
           </Link>
           <Link
             to="/add"
@@ -120,7 +129,7 @@ export default function Header() {
           </Link>
         </div>
 
-        {/* Mobile Menu Icon */}
+        {/* Mobile Menu Toggle */}
         <div className="md:hidden">
           <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
             {mobileMenuOpen ? (
@@ -132,28 +141,38 @@ export default function Header() {
         </div>
       </div>
 
-      {/* Mobile Nav Overlay */}
+      {/* Mobile Menu */}
       {mobileMenuOpen && (
-        <div className="md:hidden bg-white px-4 py-6 space-y-4 border-t shadow-sm">
+        <div className="md:hidden bg-white border-t px-4 py-6 space-y-4">
           {navItems.map(({ label, items }) => (
             <div key={label}>
-              <h4 className="text-gray-700 font-semibold mb-1">{label}</h4>
-              <div className="space-y-1">
-                {items.map(({ name, path }) => (
-                  <Link
-                    key={name}
-                    to={path}
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="block text-gray-600 hover:text-red-500"
-                  >
-                    {name}
-                  </Link>
-                ))}
-              </div>
+              <button
+                onClick={() => toggleMobileDropdown(label)}
+                className="flex justify-between w-full text-left text-gray-800 font-semibold"
+              >
+                {label}
+                <ChevronDown
+                  className={`w-4 h-4 transform transition-transform ${
+                    mobileDropdowns[label] ? "rotate-180" : ""
+                  }`}
+                />
+              </button>
+              {mobileDropdowns[label] && (
+                <div className="pl-4 mt-1 space-y-1">
+                  {items.map(({ name, path }) => (
+                    <Link
+                      key={name}
+                      to={path}
+                      className="block text-gray-600 hover:text-red-500 text-sm"
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      {name}
+                    </Link>
+                  ))}
+                </div>
+              )}
             </div>
           ))}
-
-          {/* Mobile Actions */}
           <div className="flex flex-wrap items-center gap-4 mt-4">
             <Link to="/favorites" onClick={() => setMobileMenuOpen(false)}>
               <Bookmark className="w-5 h-5 text-gray-600 hover:text-red-500" />
@@ -164,8 +183,8 @@ export default function Header() {
             </Link>
             <Link
               to="/add"
-              onClick={() => setMobileMenuOpen(false)}
               className="flex items-center px-3 py-2 bg-stone-200 text-black text-sm font-medium rounded hover:bg-red-600 hover:text-white transition"
+              onClick={() => setMobileMenuOpen(false)}
             >
               <Plus className="w-4 h-4 mr-1" />
               Add Recipe
