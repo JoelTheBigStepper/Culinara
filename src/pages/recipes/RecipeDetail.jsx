@@ -1,29 +1,25 @@
 import { useParams, Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { Clock, UtensilsCrossed, ChefHat, Users, CheckCircle } from "lucide-react";
-// import RecipeSteps from "../components/RecipeSteps";
 
 export default function RecipeDetail() {
   const { id } = useParams();
   const [recipe, setRecipe] = useState(null);
 
   useEffect(() => {
-    const allRecipes = JSON.parse(localStorage.getItem("recipes")) || [];
-    const found = allRecipes.find((r) => r.id === parseInt(id));
-    setRecipe(found);
-  }, [id]);
-
-  useEffect(() => {
     const recipes = JSON.parse(localStorage.getItem("recipes")) || [];
-    const updated = recipes.map(recipe => {
-      if (recipe.id === parseInt(id)) {
-        return {
-          ...recipe,
-          views: (recipe.views || 0) + 1, // Increment views
+    const updated = recipes.map((r) => {
+      if (r.id === parseInt(id, 10)) {
+        const updatedRecipe = {
+          ...r,
+          views: (r.views || 0) + 1,
         };
+        setRecipe(updatedRecipe); // Update state with incremented view
+        return updatedRecipe;
       }
-      return recipe;
+      return r;
     });
+
     localStorage.setItem("recipes", JSON.stringify(updated));
   }, [id]);
 
@@ -43,7 +39,7 @@ export default function RecipeDetail() {
       {/* Left: Image */}
       <div>
         <img
-          src={recipe.image}
+          src={recipe.image || "/fallback.jpg"}
           alt={recipe.title}
           className="w-full h-[450px] object-cover rounded-xl shadow-md"
         />
@@ -74,6 +70,8 @@ export default function RecipeDetail() {
           </div>
         </div>
 
+        <div className="text-sm text-gray-500">Viewed {recipe.views || 1} {recipe.views === 1 ? "time" : "times"}</div>
+
         <p className="text-gray-700">{recipe.description}</p>
 
         {/* Ingredients */}
@@ -87,18 +85,23 @@ export default function RecipeDetail() {
             </ul>
           </div>
         )}
-        {/* <RecipeSteps steps={recipe.steps} /> */}
-        {/* Steps with vertical progress bar */}
+
+        {/* Preparation Steps */}
         {recipe.steps?.length > 0 && (
           <div>
             <h2 className="text-2xl font-semibold mt-6 mb-3">Preparation Steps</h2>
             <div className="relative pl-6 space-y-6">
-              {recipe.steps.map((step, idx) => (
-                <div key={idx} className="flex items-start gap-6 relative pl-8">
-                  <CheckCircle className="absolute -left-[22px] top-1 text-[#FF6F61] bg-white" size={18} />
-                  <p className="text-gray-700"><span className="font-semibold">Step {idx + 1}:</span> {step}</p>
-                </div>
-              ))}
+              {recipe.steps.map((step, idx) => {
+                const stepText = typeof step === "string" ? step : step.instruction;
+                return (
+                  <div key={idx} className="flex items-start gap-6 relative pl-8">
+                    <CheckCircle className="absolute -left-[22px] top-1 text-[#FF6F61] bg-white" size={18} />
+                    <p className="text-gray-700">
+                      <span className="font-semibold">Step {idx + 1}:</span> {stepText}
+                    </p>
+                  </div>
+                );
+              })}
             </div>
           </div>
         )}

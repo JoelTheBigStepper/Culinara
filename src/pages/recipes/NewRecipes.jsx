@@ -2,8 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
 function getRemainingTime(createdAt) {
-//   const expirationTime = new Date(createdAt).getTime() + 24 * 60 * 60 * 1000;
-const expirationTime = new Date(createdAt).getTime() + 20 * 1000; // 10 seconds
+  const expirationTime = new Date(createdAt).getTime() + 24 * 60 * 60 * 1000; // 24 hours
   const now = Date.now();
   const remaining = expirationTime - now;
   return remaining > 0 ? remaining : 0;
@@ -14,24 +13,26 @@ function formatTime(ms) {
   const hours = Math.floor(totalSeconds / 3600);
   const minutes = Math.floor((totalSeconds % 3600) / 60);
   const seconds = totalSeconds % 60;
-  return `${hours}h ${minutes}m ${seconds}s`;
+
+  const pad = (n) => String(n).padStart(2, "0");
+  return `${pad(hours)}h ${pad(minutes)}m ${pad(seconds)}s`;
 }
 
 export default function NewRecipes() {
   const [recipes, setRecipes] = useState([]);
 
   useEffect(() => {
-    const interval = setInterval(() => {
+    const updateRecipes = () => {
       const all = JSON.parse(localStorage.getItem("recipes")) || [];
       const filtered = all
-        .filter(recipe => {
-          const timeLeft = getRemainingTime(recipe.createdAt);
-          return timeLeft > 0;
-        })
+        .filter((recipe) => getRemainingTime(recipe.createdAt) > 0)
         .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
       setRecipes(filtered);
-    }, 1000); // refresh countdown every second
+    };
+
+    updateRecipes(); // run once on mount
+    const interval = setInterval(updateRecipes, 1000); // update every second
 
     return () => clearInterval(interval);
   }, []);
@@ -44,12 +45,12 @@ export default function NewRecipes() {
         <p className="text-gray-500">No new recipes found.</p>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          {recipes.map(recipe => {
+          {recipes.map((recipe) => {
             const timeLeft = getRemainingTime(recipe.createdAt);
             return (
               <Link
-                to={`/recipe/${recipe.id}`}
                 key={recipe.id}
+                to={`/recipe/${recipe.id}`}
                 className="bg-white rounded-xl border hover:shadow-md transition overflow-hidden"
               >
                 <img

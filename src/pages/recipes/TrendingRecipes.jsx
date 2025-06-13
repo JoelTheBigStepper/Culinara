@@ -1,6 +1,4 @@
 import { useEffect, useState } from "react";
-// import { Link } from "react-router-dom";    
-// import { Heart, Bookmark } from "lucide-react";
 import RecipeCard from "../../components/RecipeCard";
 
 export default function TrendingRecipes() {
@@ -37,11 +35,11 @@ export default function TrendingRecipes() {
     setInteractionData(updated);
     localStorage.setItem("interactions", JSON.stringify(updated));
 
-    const newRecipes = recipes.map((r) =>
+    const updatedRecipes = recipes.map((r) =>
       r.id === id ? { ...r, ...updated[id] } : r
     );
 
-    const sorted = newRecipes.sort(
+    const sorted = updatedRecipes.sort(
       (a, b) => (b.likes + b.shares) - (a.likes + a.shares)
     );
 
@@ -54,14 +52,14 @@ export default function TrendingRecipes() {
 
       {recipes.length === 0 ? (
         <p className="text-gray-500">No trending recipes available.</p>
-        ) : (
+      ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
           {recipes.map((recipe) => (
             <RecipeCard
-            key={recipe.id}
-            recipe={recipe}
-            onLike={(id) => updateInteraction(id, "likes")}
-            onShare={(id) => updateInteraction(id, "shares")}
+              key={recipe.id}
+              recipe={recipe}
+              onLike={() => updateInteraction(recipe.id, "likes")}
+              onShare={() => updateInteraction(recipe.id, "shares")}
             />
           ))}
         </div>
