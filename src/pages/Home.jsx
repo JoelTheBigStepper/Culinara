@@ -1,69 +1,87 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Search } from "lucide-react";
-
-import RecipeSection from "../components/RecipeSection";
-import myImage from "../assets/chef-logo.png";
+import { Search, Flame, Utensils, Clock } from "lucide-react";
 import bgImage from "../assets/background.jpg";
 
-const Home = () => {
-  const [query, setQuery] = useState("");
+const trendingTags = ["Pasta", "Vegan", "Quick Meals", "Chicken", "Desserts", "Nigerian", "Healthy"];
+
+export default function Home() {
   const navigate = useNavigate();
+  const [query, setQuery] = useState("");
+  const [recentSearches, setRecentSearches] = useState([]);
+
+  useEffect(() => {
+    const stored = JSON.parse(localStorage.getItem("recentSearches")) || [];
+    setRecentSearches(stored.slice(0, 5)); // show last 5 searches
+  }, []);
 
   const handleSearch = (e) => {
     e.preventDefault();
-    if (query.trim()) {
-      navigate(`/search?query=${encodeURIComponent(query.trim())}`);
-    }
+    if (!query.trim()) return;
+
+    const prev = JSON.parse(localStorage.getItem("recentSearches")) || [];
+    const updated = [query, ...prev.filter((q) => q !== query)];
+    localStorage.setItem("recentSearches", JSON.stringify(updated.slice(0, 10)));
+
+    navigate(`/search?query=${encodeURIComponent(query)}`);
+  };
+
+  const handleTagClick = (tag) => {
+    setQuery(tag);
+    navigate(`/search?query=${encodeURIComponent(tag)}`);
   };
 
   return (
-    <div>
-      <div
-        className="h-screen bg-cover bg-center flex items-center"
-        style={{ backgroundImage: `url(${bgImage})` }}
-      >
-        <div className="max-w-7xl mx-auto px-6 md:px-12 lg:px-24 w-full">
-          <div className="flex flex-col items-start gap-6 bg-white/80 backdrop-blur-sm p-8 rounded-lg shadow-xl max-w-2xl">
-            {/* Logo and Title */}
-            <div className="flex items-center gap-4">
-              <img
-                src={myImage}
-                alt="Culinara logo"
-                className="h-16 w-16 object-contain"
-              />
-              <h1 className="text-3xl md:text-4xl font-bold text-[#2E2E2E] leading-snug">
-                Bringing Flavor to Your Fingertips
-              </h1>
-            </div>
+    <section
+      className="relative bg-cover bg-center bg-no-repeat min-h-[70vh] flex items-center justify-center"
+      style={{ backgroundImage: `url(${bgImage})` }}
+    >
+      {/* Overlay */}
+      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>
 
-            {/* Search Bar */}
-            <form onSubmit={handleSearch} className="w-full">
-              <div className="flex w-full rounded-lg shadow-md overflow-hidden">
-                <input
-                  type="text"
-                  value={query}
-                  onChange={(e) => setQuery(e.target.value)}
-                  placeholder="Search recipes, ingredients, cuisines..."
-                  className="flex-grow px-4 py-3 text-base outline-none bg-white"
-                />
-                <button
-                  type="submit"
-                  className="bg-[#FF6F61] text-white w-14 flex items-center justify-center hover:bg-[#e05c4f] transition"
-                  aria-label="Search"
-                >
-                  <Search className="w-5 h-5" />
-                </button>
-              </div>
-            </form>
-          </div>
+      {/* Content */}
+      <div className="relative z-10 max-w-4xl text-center px-4 text-white">
+        <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold leading-tight mb-4">
+          Discover Delicious Recipes
+        </h1>
+        <p className="text-lg sm:text-xl text-gray-200 mb-6">
+          Explore trending dishes, healthy meals, and quick bites. Start your cooking adventure now.
+        </p>
+
+        {/* Search Bar */}
+        <form
+          onSubmit={handleSearch}
+          className="flex items-center bg-white rounded-lg overflow-hidden shadow-md max-w-xl mx-auto"
+        >
+          <Search className="text-gray-500 ml-3" />
+          <input
+            type="text"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Search recipes..."
+            className="w-full px-4 py-2 focus:outline-none"
+          />
+          <button
+            type="submit"
+            className="bg-red-500 hover:bg-red-600 text-white px-4 py-2"
+          >
+            Search
+          </button>
+        </form>
+
+        {/* Trending Tags */}
+        <div className="mt-8 flex flex-wrap justify-center gap-3 text-sm sm:text-base">
+          {trendingTags.map((tag) => (
+            <button
+              key={tag}
+              onClick={() => handleTagClick(tag)}
+              className="bg-white/10 border border-white/20 hover:bg-white/20 transition text-white px-4 py-2 rounded-full"
+            >
+              #{tag}
+            </button>
+          ))}
         </div>
       </div>
-
-      {/* Recipe Sections */}
-      <RecipeSection />
-    </div>
+    </section>
   );
-};
-
-export default Home;
+}
