@@ -74,8 +74,8 @@ export default function Header() {
   }, []);
 
   return (
-    <header className="bg-white shadow sticky top-0 z-50 w-full">
-      <div className="max-w-7xl mx-auto px-4 py-3 md:px-6 flex justify-between items-center" ref={containerRef}>
+    <header className="bg-white sticky top-0 z-50 w-full">
+      <div className="max-w-7xl mx-auto px-2 py-1 md:px-6 flex justify-between items-center" ref={containerRef}>
         {/* Logo */}
         <Link to="/home" className="flex items-center text-xl font-bold text-red-600">
           <img src={myImage} alt="Culinara logo" className="h-12 w-12 sm:h-16 sm:w-16" />
