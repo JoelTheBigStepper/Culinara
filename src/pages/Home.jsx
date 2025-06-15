@@ -1,24 +1,22 @@
-import React from "react";
-import { useState } from 'react';
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Search } from "lucide-react";
-import { useNavigate } from 'react-router-dom';
-// import SearchBar from "../components/SearchBar";
+
 import RecipeSection from "../components/RecipeSection";
 import myImage from "../assets/chef-logo.png";
 import bgImage from "../assets/background.jpg";
 
 const Home = () => {
+  const [query, setQuery] = useState("");
+  const navigate = useNavigate();
 
-  const [query, setQuery] = useState('');
-    const navigate = useNavigate();
-  
-    const handleSearch = (e) => {
-      e.preventDefault();
-      if (query.trim()) {
-        navigate(`/search?query=${encodeURIComponent(query.trim())}`);
-      }
-    };
-  
+  const handleSearch = (e) => {
+    e.preventDefault();
+    if (query.trim()) {
+      navigate(`/search?query=${encodeURIComponent(query.trim())}`);
+    }
+  };
+
   return (
     <div>
       <div
@@ -26,30 +24,44 @@ const Home = () => {
         style={{ backgroundImage: `url(${bgImage})` }}
       >
         <div className="max-w-7xl mx-auto px-6 md:px-12 lg:px-24 w-full">
-          <div className="flex flex-col items-start space-y-6 bg-white/70 p-8 rounded-lg max-w-xl shadow-xl">
-            <div className="flex items-center space-x-4">
-              <img src={myImage} alt="Culinara logo" className="h-16 w-16 object-contain" />
-              <h1 className="text-4xl font-bold text-[#2E2E2E]">Bringing Flavor to Your Fingertips</h1>
-            </div>
-            {/* <SearchBar/> */}
-            <form onSubmit={handleSearch} className="flex w-full">
-              <div className="flex w-full mt-4 rounded-md shadow-lg overflow-hidden">
-              <input
-                type="text"
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                placeholder="Search recipes, ingredients, cuisines..."
-                className="flex-grow px-6 py-4 text-lg outline-none bg-white"
+          <div className="flex flex-col items-start gap-6 bg-white/80 backdrop-blur-sm p-8 rounded-lg shadow-xl max-w-2xl">
+            {/* Logo and Title */}
+            <div className="flex items-center gap-4">
+              <img
+                src={myImage}
+                alt="Culinara logo"
+                className="h-16 w-16 object-contain"
               />
-              <button type='submit' className="bg-[#FF6F61] text-white w-16 flex items-center justify-center hover:bg-[#e05c4f] transition">
-                <Search className="w-6 h-6" />
-              </button>
+              <h1 className="text-3xl md:text-4xl font-bold text-[#2E2E2E] leading-snug">
+                Bringing Flavor to Your Fingertips
+              </h1>
             </div>
+
+            {/* Search Bar */}
+            <form onSubmit={handleSearch} className="w-full">
+              <div className="flex w-full rounded-lg shadow-md overflow-hidden">
+                <input
+                  type="text"
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  placeholder="Search recipes, ingredients, cuisines..."
+                  className="flex-grow px-4 py-3 text-base outline-none bg-white"
+                />
+                <button
+                  type="submit"
+                  className="bg-[#FF6F61] text-white w-14 flex items-center justify-center hover:bg-[#e05c4f] transition"
+                  aria-label="Search"
+                >
+                  <Search className="w-5 h-5" />
+                </button>
+              </div>
             </form>
           </div>
         </div>
       </div>
-      <RecipeSection/>
+
+      {/* Recipe Sections */}
+      <RecipeSection />
     </div>
   );
 };

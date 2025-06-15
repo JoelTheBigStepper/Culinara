@@ -56,7 +56,7 @@ export default function MyRecipes() {
                   Difficulty: {recipe.difficulty || "N/A"}
                 </p>
 
-                <div className="mb-3">
+                {/* <div className="mb-3">
                   <h4 className="font-bold text-sm mb-1">Ingredients:</h4>
                   {recipe.ingredients?.length > 0 ? (
                     <ul className="list-disc pl-5 text-sm space-y-1">
@@ -67,9 +67,9 @@ export default function MyRecipes() {
                   ) : (
                     <p className="text-gray-400 text-sm">No ingredients listed.</p>
                   )}
-                </div>
+                </div> */}
 
-                <div>
+                {/* <div>
                   <h4 className="font-bold text-sm mb-1">Steps:</h4>
                   {recipe.steps?.length > 0 ? (
                     <ol className="list-decimal pl-5 text-sm space-y-1">
@@ -80,7 +80,7 @@ export default function MyRecipes() {
                   ) : (
                     <p className="text-gray-400 text-sm">No steps provided.</p>
                   )}
-                </div>
+                </div> */}
               </div>
             </div>
           ))}
