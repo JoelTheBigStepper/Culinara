@@ -223,8 +223,6 @@ export default function Header() {
           </div>
         </div>
       )}
-
-      {/* Page top padding to push content below header */}
       <div className="h-16 md:h-20" />
     </>
   );
