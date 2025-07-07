@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-// import { Link } from "react-router-dom";
 import RecipeCard from "../../components/RecipeCard";
+import { getAllRecipes } from "../../utils/api";
 
 export default function AllRecipes() {
   const [recipes, setRecipes] = useState([]);
@@ -8,10 +8,13 @@ export default function AllRecipes() {
   const [filterCuisine, setFilterCuisine] = useState("All");
   const [filterDifficulty, setFilterDifficulty] = useState("All");
   const [sortOrder, setSortOrder] = useState("latest");
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const stored = JSON.parse(localStorage.getItem("recipes")) || [];
-    setRecipes(stored);
+    getAllRecipes()
+      .then(setRecipes)
+      .catch(() => console.error("Failed to fetch recipes"))
+      .finally(() => setLoading(false));
   }, []);
 
   const handleFilter = (recipe) => {
@@ -103,7 +106,9 @@ export default function AllRecipes() {
       </div>
 
       {/* Recipe Grid */}
-      {sortedFilteredRecipes().length === 0 ? (
+      {loading ? (
+        <p className="text-gray-500 text-center">Loading recipes...</p>
+      ) : sortedFilteredRecipes().length === 0 ? (
         <p className="text-gray-500 text-center">No recipes match your criteria.</p>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">

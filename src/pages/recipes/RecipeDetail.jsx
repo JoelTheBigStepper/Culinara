@@ -1,120 +1,155 @@
-import { useParams, Link } from "react-router-dom";
-import { useEffect, useState } from "react";
-import { Clock, UtensilsCrossed, ChefHat, Users, CheckCircle } from "lucide-react";
+import { useEffect, useState } from 'react';
+import { useParams, Link } from 'react-router-dom';
+import { getRecipeById } from '../../utils/api';
+import {
+  Clock,
+  UtensilsCrossed,
+  ChefHat,
+  Users,
+  CheckCircle,
+} from 'lucide-react';
 
 export default function RecipeDetail() {
   const { id } = useParams();
   const [recipe, setRecipe] = useState(null);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    const recipes = JSON.parse(localStorage.getItem("recipes")) || [];
-    const updated = recipes.map((r) => {
-      if (r.id === parseInt(id, 10)) {
-        const updatedRecipe = {
-          ...r,
-          views: (r.views || 0) + 1,
-        };
-        setRecipe(updatedRecipe); // Update state with incremented view
-        return updatedRecipe;
-      }
-      return r;
-    });
-
-    localStorage.setItem("recipes", JSON.stringify(updated));
+    getRecipeById(id)
+      .then(setRecipe)
+      .catch(() => setError('Recipe not found.'));
   }, [id]);
 
+  if (error) return <div className="text-center text-red-500 mt-8">{error}</div>;
+  if (!recipe) return <div className="text-center mt-8">Loading...</div>;
+
+  const {
+    title,
+    image,
+    description,
+    ingredients = [],
+    steps = [],
+    prepTime,
+    cookTime,
+    cuisine,
+    difficulty,
+    servings,
+    rating,
+    authorName,
+  } = recipe;
+
   const getDifficultyColor = (level) => {
-    switch (level?.toLowerCase()) {
-      case 'easy': return 'text-green-600';
-      case 'moderate': return 'text-yellow-600';
-      case 'hard': return 'text-red-600';
-      default: return 'text-gray-500';
+    if (!level) return 'text-gray-400';
+    switch (level.toLowerCase()) {
+      case 'easy':
+        return 'text-green-600';
+      case 'moderate':
+        return 'text-yellow-600';
+      case 'hard':
+        return 'text-red-600';
+      default:
+        return 'text-gray-400';
     }
   };
 
-  if (!recipe) return <p className="p-4 text-gray-500">Recipe not found.</p>;
-
   return (
-    <div className="max-w-6xl mx-auto px-4 py-8 grid grid-cols-1 lg:grid-cols-2 gap-8 bg-[#f8f8f8]">
-      {/* Left: Image */}
-      <div>
-        <img
-          src={recipe.image || "/fallback.jpg"}
-          alt={recipe.title}
-          className="w-full h-[450px] object-cover rounded-xl shadow-md"
-        />
+    <div className="max-w-5xl mx-auto px-4 py-10">
+      <img
+        src={image}
+        alt={title}
+        className="w-full max-h-[500px] object-cover rounded-xl shadow mb-6"
+      />
+
+      <h1 className="text-3xl font-bold mb-2">{title}</h1>
+      {authorName && <p className="text-gray-600 mb-4">By {authorName}</p>}
+      {rating && (
+        <div className="inline-flex items-center gap-1 text-yellow-500 mb-4">
+          <CheckCircle size={18} /> <span className="font-medium">{rating}</span>
+        </div>
+      )}
+
+      {/* Meta Info */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 text-gray-700 text-sm mb-6">
+        <div className="flex items-center gap-2">
+          <Clock size={16} className="text-gray-500" />
+          <span>
+            <strong>Prep:</strong> {prepTime || 'N/A'} mins
+          </span>
+        </div>
+        <div className="flex items-center gap-2">
+          <Clock size={16} className="text-gray-500" />
+          <span>
+            <strong>Cook:</strong> {cookTime || 'N/A'} mins
+          </span>
+        </div>
+        <div className="flex items-center gap-2">
+          <UtensilsCrossed size={16} className="text-gray-500" />
+          <span>{cuisine || 'N/A'}</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <ChefHat size={16} className="text-gray-500" />
+          <span className={getDifficultyColor(difficulty)}>{difficulty || 'N/A'}</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <Users size={16} className="text-gray-500" />
+          <span>{servings ? `${servings} servings` : 'N/A'}</span>
+        </div>
       </div>
 
-      {/* Right: Info */}
-      <div className="space-y-6">
-        <p className="text-sm uppercase text-[#FF6F61] font-semibold">Breakfasts</p>
-        <h1 className="text-4xl font-bold leading-tight">{recipe.title}</h1>
-
-        {/* Meta Info */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm text-gray-600 mt-6">
-          <div className="flex items-center gap-2">
-            <Clock size={18} className="text-[#FF6F61]" />
-            <span>{recipe.cookTime}</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <UtensilsCrossed size={18} className="text-[#FF6F61]" />
-            <span>{recipe.cuisine || "N/A"}</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <Users size={18} className="text-[#FF6F61]" />
-            <span>{recipe.servings || "1"} Serves</span>
-          </div>
-          <div className={`flex items-center gap-2 ${getDifficultyColor(recipe.difficulty)}`}>
-            <ChefHat size={18} />
-            <span className="capitalize">{recipe.difficulty}</span>
-          </div>
+      {description && (
+        <div className="mb-6">
+          <h3 className="text-xl font-semibold mb-2">Description</h3>
+          <p className="text-gray-700 leading-relaxed">{description}</p>
         </div>
+      )}
 
-        <div className="text-sm text-gray-500">Viewed {recipe.views || 1} {recipe.views === 1 ? "time" : "times"}</div>
-
-        <p className="text-gray-700">{recipe.description}</p>
-
-        {/* Ingredients */}
-        {recipe.ingredients?.length > 0 && (
-          <div>
-            <h2 className="text-2xl font-semibold mt-6 mb-3">Ingredients</h2>
-            <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-gray-700 list-disc list-inside">
-              {recipe.ingredients.map((item, idx) => (
-                <li key={idx}>{item}</li>
-              ))}
-            </ul>
-          </div>
-        )}
-
-        {/* Preparation Steps */}
-        {recipe.steps?.length > 0 && (
-          <div>
-            <h2 className="text-2xl font-semibold mt-6 mb-3">Preparation Steps</h2>
-            <div className="relative pl-6 space-y-6">
-              {recipe.steps.map((step, idx) => {
-                const stepText = typeof step === "string" ? step : step.instruction;
-                return (
-                  <div key={idx} className="flex items-start gap-6 relative pl-8">
-                    <CheckCircle className="absolute -left-[22px] top-1 text-[#FF6F61] bg-white" size={18} />
-                    <p className="text-gray-700">
-                      <span className="font-semibold">Step {idx + 1}:</span> {stepText}
-                    </p>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        )}
-
-        {/* Back Button */}
-        <div className="mt-8">
-          <Link
-            to="/recipes/my-recipes"
-            className="inline-block bg-[#FF6F61] text-white px-6 py-3 rounded hover:bg-[#e85b50] transition"
-          >
-            ← Back to My Recipes
-          </Link>
+      {/* Ingredients */}
+      {ingredients.length > 0 && (
+        <div className="mb-6">
+          <h3 className="text-xl font-semibold mb-2">Ingredients</h3>
+          <ul className="list-disc list-inside text-gray-700 space-y-1">
+            {ingredients.map((item, index) => (
+              <li key={index}>{item}</li>
+            ))}
+          </ul>
         </div>
+      )}
+
+      {/* Steps */}
+      {steps.length > 0 && (
+        <div className="mb-6">
+          <h3 className="text-xl font-semibold mb-2">Steps</h3>
+          <ol className="list-decimal list-inside space-y-3 text-gray-700">
+            {steps.map((step, index) => (
+              <li key={index}>
+                <p className="font-medium">Step {index + 1}</p>
+                {typeof step === 'string' ? (
+                  <p>{step}</p>
+                ) : (
+                  <>
+                    <p>{step.instruction}</p>
+                    {step.image && (
+                      <img
+                        src={step.image}
+                        alt={`Step ${index + 1}`}
+                        className="w-full max-w-md mt-2 rounded"
+                      />
+                    )}
+                  </>
+                )}
+              </li>
+            ))}
+          </ol>
+        </div>
+      )}
+
+      <div className="mt-8">
+        <Link
+          to="/home"
+          className="inline-block bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition"
+        >
+          ← Back to Home
+        </Link>
       </div>
     </div>
   );

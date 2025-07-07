@@ -2,17 +2,28 @@ import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { Clock, UtensilsCrossed, ChefHat } from "lucide-react";
 import { getCurrentUser } from "../../utils/authUtils";
+import { getAllRecipes } from "../../utils/api"; // <-- Uses MockAPI
 
 export default function MyRecipes() {
   const [recipes, setRecipes] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     const currentUser = getCurrentUser();
-    if (!currentUser) return;
+    if (!currentUser) {
+      setError("User not found");
+      setLoading(false);
+      return;
+    }
 
-    const stored = JSON.parse(localStorage.getItem("recipes")) || [];
-    const userRecipes = stored.filter((recipe) => recipe.userId === currentUser.id);
-    setRecipes(userRecipes);
+    getAllRecipes()
+      .then((all) => {
+        const userRecipes = all.filter((recipe) => recipe.userId === currentUser.id);
+        setRecipes(userRecipes);
+      })
+      .catch(() => setError("Failed to load recipes"))
+      .finally(() => setLoading(false));
   }, []);
 
   const getDifficultyColor = (level) => {
@@ -29,10 +40,18 @@ export default function MyRecipes() {
     }
   };
 
+  if (loading) {
+    return <div className="text-center mt-8 text-gray-500">Loading your recipes...</div>;
+  }
+
+  if (error) {
+    return <div className="text-center mt-8 text-red-500">{error}</div>;
+  }
+
   if (recipes.length === 0) {
     return (
       <div className="max-w-7xl mx-auto px-4 py-8 text-center text-lg text-gray-600">
-        No recipes added yet.
+        You haven’t added any recipes yet.
       </div>
     );
   }
@@ -59,7 +78,7 @@ export default function MyRecipes() {
               <div className="grid grid-cols-2 gap-1 text-sm text-gray-500">
                 <div className="flex items-center gap-1">
                   <Clock size={16} className="text-gray-400" />
-                  <p className="font-medium text-md hover:text-red-500">{recipe.cookTime}</p>
+                  <p className="font-medium text-md hover:text-red-500">{recipe.cookTime || "N/A"}</p>
                 </div>
                 <div className="flex items-center gap-1">
                   <UtensilsCrossed size={16} className="text-gray-400" />
@@ -69,7 +88,7 @@ export default function MyRecipes() {
                 </div>
                 <div className={`flex items-center gap-1 ${getDifficultyColor(recipe.difficulty)}`}>
                   <ChefHat size={20} />
-                  <p className="font-medium text-md">{recipe.difficulty}</p>
+                  <p className="font-medium text-md">{recipe.difficulty || "N/A"}</p>
                 </div>
               </div>
             </div>

@@ -1,6 +1,7 @@
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { Clock, UtensilsCrossed, ChefHat } from "lucide-react";
+import { getAllRecipes } from "../utils/api"; // ✅ Add this line
 
 export default function CuisinePage() {
   const { cuisine } = useParams();
@@ -12,12 +13,20 @@ export default function CuisinePage() {
   const [sortBy, setSortBy] = useState("");
 
   useEffect(() => {
-    const recipes = JSON.parse(localStorage.getItem("recipes")) || [];
-    const filtered = recipes.filter(
-      (r) => r.cuisine?.toLowerCase() === cuisine.toLowerCase()
-    );
-    setAllRecipes(filtered);
-    setFilteredRecipes(filtered);
+    const fetchRecipes = async () => {
+      try {
+        const recipes = await getAllRecipes(); // ✅ Fetch from API
+        const filtered = recipes.filter(
+          (r) => r.cuisine?.toLowerCase() === cuisine.toLowerCase()
+        );
+        setAllRecipes(filtered);
+        setFilteredRecipes(filtered);
+      } catch (error) {
+        console.error("Error fetching recipes:", error);
+      }
+    };
+
+    fetchRecipes();
   }, [cuisine]);
 
   useEffect(() => {
