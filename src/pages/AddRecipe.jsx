@@ -9,7 +9,7 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { getCurrentUser } from "../utils/authUtils";
-import { createRecipe } from "../utils/api";
+import { addRecipe } from "../utils/api";
 
 function SortableItem({ id, value, onChange, placeholder }) {
   const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id });
@@ -122,7 +122,7 @@ export default function AddRecipe() {
     };
 
     try {
-      await createRecipe(newRecipe);
+      await addRecipe(newRecipe);
       alert("Recipe added successfully!");
       navigate("/recipes/new");
     } catch (error) {
