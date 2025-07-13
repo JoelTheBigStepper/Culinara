@@ -19,17 +19,17 @@ export default function RecipeDetail() {
   const [isOwner, setIsOwner] = useState(false);
 
   useEffect(() => {
-  getRecipeById(id)
-    .then((res) => {
-      setRecipe(res.data);
-      const user = JSON.parse(localStorage.getItem("currentUser")); 
-      if (user && res.data.userId === user.id) {
-        setIsOwner(true);
-      }
-    })
-    .catch(() => setError("Recipe not found."));
-}, [id]);
+    getRecipeById(id)
+      .then((res) => {
+        setRecipe(res.data || res); // 🔁 supports both `.data` and object directly
 
+        const user = JSON.parse(localStorage.getItem("currentUser"));
+        if (user && (res.data?.userId || res.userId) === user.id) {
+          setIsOwner(true);
+        }
+      })
+      .catch(() => setError("Recipe not found."));
+  }, [id]);
 
   const handleDelete = async () => {
     const confirm = window.confirm("Are you sure you want to delete this recipe?");
@@ -117,7 +117,6 @@ export default function RecipeDetail() {
         </div>
       )}
 
-      {/* Meta Info */}
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 text-gray-700 text-sm mb-6">
         <div className="flex items-center gap-2">
           <Clock size={16} />
@@ -145,7 +144,6 @@ export default function RecipeDetail() {
         </div>
       </div>
 
-      {/* Description */}
       {description && (
         <div className="mb-6">
           <h3 className="text-xl font-semibold mb-2">Description</h3>
@@ -153,7 +151,6 @@ export default function RecipeDetail() {
         </div>
       )}
 
-      {/* Ingredients */}
       {ingredients.length > 0 && (
         <div className="mb-6">
           <h3 className="text-xl font-semibold mb-2">Ingredients</h3>
@@ -165,7 +162,6 @@ export default function RecipeDetail() {
         </div>
       )}
 
-      {/* Steps */}
       {steps.length > 0 && (
         <div className="mb-6">
           <h3 className="text-xl font-semibold mb-2">Steps</h3>
