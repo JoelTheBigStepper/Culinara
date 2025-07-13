@@ -19,16 +19,17 @@ export default function RecipeDetail() {
   const [isOwner, setIsOwner] = useState(false);
 
   useEffect(() => {
-    getRecipeById(id)
-      .then((res) => {
-        setRecipe(res.data);
-        const user = JSON.parse(localStorage.getItem("user"));
-        if (user && res.data.userId === user.id) {
-          setIsOwner(true);
-        }
-      })
-      .catch(() => setError("Recipe not found."));
-  }, [id]);
+  getRecipeById(id)
+    .then((res) => {
+      setRecipe(res.data);
+      const user = JSON.parse(localStorage.getItem("currentUser")); 
+      if (user && res.data.userId === user.id) {
+        setIsOwner(true);
+      }
+    })
+    .catch(() => setError("Recipe not found."));
+}, [id]);
+
 
   const handleDelete = async () => {
     const confirm = window.confirm("Are you sure you want to delete this recipe?");

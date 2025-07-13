@@ -1,25 +1,39 @@
 // src/pages/auth/SignIn.jsx
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
+import axios from "axios";
+
+const MOCK_API_BASE_URL = "https://6862fce088359a373e93a76f.mockapi.io/api/v1";
 
 export default function SignIn() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  const handleSignIn = (e) => {
+  const handleSignIn = async (e) => {
     e.preventDefault();
-    const storedUsers = JSON.parse(localStorage.getItem("users")) || [];
-    const user = storedUsers.find(
-      (u) => u.email === email.toLowerCase() && u.password === password
-    );
+    setError("");
+    setLoading(true);
 
-    if (user) {
-      localStorage.setItem("currentUser", JSON.stringify(user));
-      navigate("/profile");
-    } else {
-      setError("Invalid email or password.");
+    try {
+      const { data: users } = await axios.get(`${MOCK_API_BASE_URL}/users`);
+      const user = users.find(
+        (u) => u.email === email.trim().toLowerCase() && u.password === password
+      );
+
+      if (user) {
+        localStorage.setItem("currentUser", JSON.stringify(user));
+        navigate("/profile");
+      } else {
+        setError("Invalid email or password.");
+      }
+    } catch (err) {
+      console.error(err);
+      setError("Network error. Please try again.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -42,7 +56,7 @@ export default function SignIn() {
             <input
               type="email"
               id="email"
-              className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-400"
+              className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-red-400"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
@@ -57,7 +71,7 @@ export default function SignIn() {
             <input
               type="password"
               id="password"
-              className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-400"
+              className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-red-400"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
@@ -67,9 +81,10 @@ export default function SignIn() {
 
           <button
             type="submit"
+            disabled={loading}
             className="w-full bg-red-500 text-white font-semibold py-2 rounded-md hover:bg-red-600 transition"
           >
-            Sign In
+            {loading ? "Signing In..." : "Sign In"}
           </button>
         </form>
 
