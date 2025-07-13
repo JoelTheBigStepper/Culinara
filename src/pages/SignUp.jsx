@@ -1,8 +1,8 @@
-// src/pages/auth/SignUp.jsx
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { v4 as uuidv4 } from "uuid";
-import { getUsers, saveUsers, setCurrentUser } from "../utils/authUtils";
+import axios from "axios";
+
+const MOCK_API_BASE_URL = "https://your-mockapi-url.mockapi.io"; // 🔁 Replace with your actual MockAPI base URL
 
 export default function SignUp() {
   const navigate = useNavigate();
@@ -13,6 +13,7 @@ export default function SignUp() {
     avatar: ""
   });
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
     const { name, value, files } = e.target;
@@ -27,21 +28,44 @@ export default function SignUp() {
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    const users = getUsers();
-    const emailExists = users.some((u) => u.email === form.email.trim().toLowerCase());
-    if (emailExists) return setError("Email already exists.");
+    setLoading(true);
+    setError("");
 
-    const newUser = {
-      id: uuidv4(),
-      ...form,
-      email: form.email.trim().toLowerCase()
-    };
+    try {
+      // Check if email already exists
+      const { data: users } = await axios.get(`${MOCK_API_BASE_URL}/users`);
+      const emailExists = users.some(
+        (u) => u.email === form.email.trim().toLowerCase()
+      );
+      if (emailExists) {
+        setError("Email already exists.");
+        setLoading(false);
+        return;
+      }
 
-    saveUsers([...users, newUser]);
-    setCurrentUser(newUser);
-    navigate("/profile");
+      // Create new user
+      const newUser = {
+        name: form.name,
+        email: form.email.trim().toLowerCase(),
+        password: form.password,
+        avatar: form.avatar
+      };
+
+      const { data: createdUser } = await axios.post(
+        `${MOCK_API_BASE_URL}/users`,
+        newUser
+      );
+
+      localStorage.setItem("currentUser", JSON.stringify(createdUser));
+      navigate("/profile");
+    } catch (err) {
+      setError("Something went wrong. Please try again.");
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -119,9 +143,10 @@ export default function SignUp() {
 
           <button
             type="submit"
+            disabled={loading}
             className="w-full bg-red-500 text-white font-semibold py-2 rounded-md hover:bg-red-600 transition"
           >
-            Sign Up
+            {loading ? "Creating Account..." : "Sign Up"}
           </button>
         </form>
 

@@ -1,7 +1,7 @@
 // src/utils/api.js
 import axios from "axios";
 
-const BASE_URL = "https://6862fce088359a373e93a76f.mockapi.io/recipe"; // ✅ correct base
+const BASE_URL = "https://6862fce088359a373e93a76f.mockapi.io/api/v1"; // ✅ correct base
 
 export const getAllRecipes = () => axios.get(BASE_URL).then(res => res.data);
 export const getRecipeById = (id) => axios.get(`${BASE_URL}/${id}`).then(res => res.data);
