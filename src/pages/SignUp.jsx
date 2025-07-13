@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import axios from "axios";
 
-const MOCK_API_BASE_URL = "https://your-mockapi-url.mockapi.io"; // 🔁 Replace with your actual MockAPI base URL
+const MOCK_API_BASE_URL = "https://6862fce088359a373e93a76f.mockapi.io/api/v1"; // 🔁 Replace with your actual MockAPI base URL
 
 export default function SignUp() {
   const navigate = useNavigate();
