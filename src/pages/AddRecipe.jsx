@@ -1,8 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { DndContext, closestCenter } from "@dnd-kit/core";
+// import { DndContext, closestCenter } from "@dnd-kit/core";
 import {
-  arrayMove,
   SortableContext,
   verticalListSortingStrategy,
   useSortable,
@@ -87,17 +86,17 @@ export default function AddRecipe() {
     setSteps(updated);
   };
 
-  const handleIngredientDragEnd = ({ active, over }) => {
-    if (active.id !== over?.id) {
-      setIngredients((items) => arrayMove(items, active.id, over.id));
-    }
-  };
+  // const handleIngredientDragEnd = ({ active, over }) => {
+  //   if (active.id !== over?.id) {
+  //     setIngredients((items) => arrayMove(items, active.id, over.id));
+  //   }
+  // };
 
-  const handleStepDragEnd = ({ active, over }) => {
-    if (active.id !== over?.id) {
-      setSteps((items) => arrayMove(items, active.id, over.id));
-    }
-  };
+  // const handleStepDragEnd = ({ active, over }) => {
+  //   if (active.id !== over?.id) {
+  //     setSteps((items) => arrayMove(items, active.id, over.id));
+  //   }
+  // };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -158,7 +157,7 @@ export default function AddRecipe() {
         {/* Ingredients */}
         <div>
           <label className="block text-sm font-medium mb-2">Ingredients</label>
-          <DndContext collisionDetection={closestCenter} onDragEnd={handleIngredientDragEnd}>
+          
             <SortableContext items={ingredients.map((_, i) => i)} strategy={verticalListSortingStrategy}>
               {ingredients.map((ing, index) => (
                 <SortableItem
@@ -170,7 +169,7 @@ export default function AddRecipe() {
                 />
               ))}
             </SortableContext>
-          </DndContext>
+          
           <button type="button" onClick={() => setIngredients([...ingredients, ""])} className="text-sm text-red-500 hover:underline">
             + Add Ingredient
           </button>
@@ -179,7 +178,7 @@ export default function AddRecipe() {
         {/* Steps */}
         <div>
           <label className="block text-sm font-medium mb-2">Steps</label>
-          <DndContext collisionDetection={closestCenter} onDragEnd={handleStepDragEnd}>
+          
             <SortableContext items={steps.map((_, i) => i)} strategy={verticalListSortingStrategy}>
               {steps.map((step, index) => (
                 <SortableTextarea
@@ -191,7 +190,7 @@ export default function AddRecipe() {
                 />
               ))}
             </SortableContext>
-          </DndContext>
+         
           <button type="button" onClick={() => setSteps([...steps, ""])} className="text-sm text-red-500 hover:underline">
             + Add Step
           </button>
