@@ -11,6 +11,7 @@ export default function EditProfile() {
     password: "",
     avatar: ""
   });
+  const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
     const currentUser = getCurrentUser();
@@ -18,14 +19,29 @@ export default function EditProfile() {
     setForm(currentUser);
   }, [navigate]);
 
-  const handleChange = (e) => {
+  const handleChange = async (e) => {
     const { name, value, files } = e.target;
-    if (name === "avatar") {
-      const reader = new FileReader();
-      reader.onload = () => {
-        setForm((prev) => ({ ...prev, avatar: reader.result }));
-      };
-      if (files[0]) reader.readAsDataURL(files[0]);
+
+    if (name === "avatar" && files[0]) {
+      setUploading(true);
+      try {
+        const data = new FormData();
+        data.append("file", files[0]);
+        data.append("upload_preset", "YOUR_UPLOAD_PRESET"); // replace with your preset
+
+        const res = await fetch(
+          `https://api.cloudinary.com/v1_1/YOUR_CLOUD_NAME/image/upload`,
+          { method: "POST", body: data }
+        );
+
+        const file = await res.json();
+        setForm((prev) => ({ ...prev, avatar: file.secure_url }));
+        toast.success("Avatar uploaded successfully!");
+      } catch (err) {
+        toast.error("Avatar upload failed.");
+      } finally {
+        setUploading(false);
+      }
     } else {
       setForm((prev) => ({ ...prev, [name]: value }));
     }
@@ -46,10 +62,12 @@ export default function EditProfile() {
   return (
     <div className="max-w-xl mx-auto px-4 py-8">
       <Toaster position="top-center" />
-
       <h2 className="text-3xl font-bold mb-6 text-center">Edit Profile</h2>
 
-      <form onSubmit={handleSubmit} className="space-y-5 bg-white p-6 rounded-xl shadow">
+      <form
+        onSubmit={handleSubmit}
+        className="space-y-5 bg-white p-6 rounded-xl shadow"
+      >
         {/* Avatar preview */}
         {form.avatar && (
           <div className="flex justify-center mb-4">
@@ -81,9 +99,8 @@ export default function EditProfile() {
             name="email"
             placeholder="Email"
             value={form.email}
-            onChange={handleChange}
-            className="w-full border px-3 py-2 rounded bg-gray-100 cursor-not-allowed"
             disabled
+            className="w-full border px-3 py-2 rounded bg-gray-100 cursor-not-allowed"
           />
         </div>
 
@@ -107,14 +124,17 @@ export default function EditProfile() {
             name="avatar"
             accept="image/*"
             onChange={handleChange}
+            disabled={uploading}
             className="w-full border p-2 rounded"
           />
+          {uploading && <p className="text-sm text-gray-500 mt-1">Uploading...</p>}
         </div>
 
         <div className="flex gap-3 mt-4">
           <button
             type="submit"
-            className="bg-red-500 text-white px-4 py-2 rounded w-full hover:bg-red-600 transition"
+            disabled={uploading}
+            className="bg-red-500 text-white px-4 py-2 rounded w-full hover:bg-red-600 transition disabled:opacity-50"
           >
             Save Changes
           </button>

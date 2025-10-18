@@ -1,4 +1,5 @@
-// Key used to store users in localStorage
+// src/utils/authUtils.js
+
 const USERS_KEY = "users";
 const CURRENT_USER_KEY = "currentUser";
 
@@ -16,14 +17,13 @@ export const saveUser = (user) => {
 
 // Save all users to localStorage
 export const saveUsers = (users) => {
-  localStorage.setItem("users", JSON.stringify(users));
+  localStorage.setItem(USERS_KEY, JSON.stringify(users));
 };
 
 // Set the currently logged in user
 export const setCurrentUser = (user) => {
-  localStorage.setItem("currentUser", JSON.stringify(user));
+  localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(user));
 };
-
 
 // Check if a user with the given email already exists
 export const userExists = (email) => {

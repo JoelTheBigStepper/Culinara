@@ -1,254 +1,138 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-// import { DndContext, closestCenter } from "@dnd-kit/core";
-import {
-  SortableContext,
-  verticalListSortingStrategy,
-  useSortable,
-} from "@dnd-kit/sortable";
-import { CSS } from "@dnd-kit/utilities";
-import { getCurrentUser } from "../utils/authUtils";
+// src/pages/AddRecipe.jsx
+import React, { useState } from "react";
 import { addRecipe } from "../utils/api";
 
-function SortableItem({ id, value, onChange, placeholder }) {
-  const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id });
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
+const AddRecipe = () => {
+  const [formData, setFormData] = useState({
+    title: "",
+    description: "",
+    image: "",
+    prepTime: "",
+    cookTime: "",
+    difficulty: "",
+    cuisine: "",
+    category: "",
+    ingredients: [""],
+    steps: [""],
+    userId: "1", // example userId
+  });
+
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  return (
-    <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
-      <input
-        type="text"
-        value={value}
-        onChange={(e) => onChange(id, e.target.value)}
-        placeholder={placeholder}
-        className="w-full border rounded px-4 py-2 mb-2"
-        required
-      />
-    </div>
-  );
-}
-
-function SortableTextarea({ id, value, onChange, placeholder }) {
-  const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id });
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
+  const handleArrayChange = (index, e, field) => {
+    const updatedArray = [...formData[field]];
+    updatedArray[index] = e.target.value;
+    setFormData({ ...formData, [field]: updatedArray });
   };
 
-  return (
-    <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
-      <textarea
-        value={value}
-        onChange={(e) => onChange(id, e.target.value)}
-        placeholder={placeholder}
-        className="w-full border rounded px-4 py-2 mb-2"
-        required
-      />
-    </div>
-  );
-}
-
-export default function AddRecipe() {
-  const navigate = useNavigate();
-  const [title, setTitle] = useState("");
-  const [image, setImage] = useState(null);
-  const [ingredients, setIngredients] = useState([""]);
-  const [steps, setSteps] = useState([""]);
-  const [prepTime, setPrepTime] = useState("");
-  const [cookTime, setCookTime] = useState("");
-  const [difficulty, setDifficulty] = useState("easy");
-  const [cuisine, setCuisine] = useState("Italian");
-  const [category, setCategory] = useState("Dessert");
-
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImage(reader.result);
-      };
-      reader.readAsDataURL(file);
-    }
+  const addField = (field) => {
+    setFormData({ ...formData, [field]: [...formData[field], ""] });
   };
-
-  const updateIngredient = (index, value) => {
-    const updated = [...ingredients];
-    updated[index] = value;
-    setIngredients(updated);
-  };
-
-  const updateStep = (index, value) => {
-    const updated = [...steps];
-    updated[index] = value;
-    setSteps(updated);
-  };
-
-  // const handleIngredientDragEnd = ({ active, over }) => {
-  //   if (active.id !== over?.id) {
-  //     setIngredients((items) => arrayMove(items, active.id, over.id));
-  //   }
-  // };
-
-  // const handleStepDragEnd = ({ active, over }) => {
-  //   if (active.id !== over?.id) {
-  //     setSteps((items) => arrayMove(items, active.id, over.id));
-  //   }
-  // };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const currentUser = getCurrentUser();
-    if (!currentUser) {
-      alert("You must be signed in to add a recipe.");
-      return navigate("/signin");
-    }
-
-    const newRecipe = {
-      title,
-      image,
-      ingredients,
-      steps,
-      prepTime,
-      cookTime,
-      difficulty,
-      cuisine,
-      category,
-      userId: currentUser.id,
-      createdAt: new Date().toISOString(),
-    };
+    console.log("➡ Sending recipe to MockAPI:", formData);
 
     try {
-      await addRecipe(newRecipe);
+      const response = await addRecipe(formData);
+      console.log("✅ Recipe added:", response.data);
       alert("Recipe added successfully!");
-      navigate("/recipes/new");
+      setFormData({
+        title: "",
+        description: "",
+        image: "",
+        prepTime: "",
+        cookTime: "",
+        difficulty: "",
+        cuisine: "",
+        category: "",
+        ingredients: [""],
+        steps: [""],
+        userId: "1",
+      });
     } catch (error) {
-      console.error("Error creating recipe:", error);
-      alert("An error occurred while adding the recipe.");
+      console.error("❌ Error creating recipe:", error.response?.data || error);
+      alert("Failed to create recipe. Check console for details.");
     }
   };
 
   return (
-    <div className="max-w-3xl mx-auto px-4 py-8">
-      <h2 className="text-3xl font-bold mb-6">Add a New Recipe</h2>
+    <div className="max-w-3xl mx-auto p-6">
+      <h1 className="text-2xl font-semibold mb-6">Add Recipe</h1>
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <input
+          name="title"
+          placeholder="Title"
+          value={formData.title}
+          onChange={handleChange}
+          className="w-full border p-2 rounded"
+        />
+        <input
+          name="image"
+          placeholder="Image URL"
+          value={formData.image}
+          onChange={handleChange}
+          className="w-full border p-2 rounded"
+        />
+        <textarea
+          name="description"
+          placeholder="Description"
+          value={formData.description}
+          onChange={handleChange}
+          className="w-full border p-2 rounded"
+        />
 
-      <form className="space-y-6" onSubmit={handleSubmit}>
         <div>
-          <label className="block text-sm font-medium">Title</label>
-          <input
-            type="text"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            className="w-full border rounded px-4 py-2"
-            required
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium">Image Upload</label>
-          <input type="file" accept="image/*" onChange={handleImageChange} />
-          {image && (
-            <img src={image} alt="Preview" className="mt-2 w-32 h-32 object-cover rounded" />
-          )}
-        </div>
-
-        {/* Ingredients */}
-        <div>
-          <label className="block text-sm font-medium mb-2">Ingredients</label>
-          
-            <SortableContext items={ingredients.map((_, i) => i)} strategy={verticalListSortingStrategy}>
-              {ingredients.map((ing, index) => (
-                <SortableItem
-                  key={index}
-                  id={index}
-                  value={ing}
-                  onChange={updateIngredient}
-                  placeholder={`Ingredient ${index + 1}`}
-                />
-              ))}
-            </SortableContext>
-          
-          <button type="button" onClick={() => setIngredients([...ingredients, ""])} className="text-sm text-red-500 hover:underline">
+          <h3 className="font-semibold mb-2">Ingredients</h3>
+          {formData.ingredients.map((ingredient, i) => (
+            <input
+              key={i}
+              value={ingredient}
+              onChange={(e) => handleArrayChange(i, e, "ingredients")}
+              placeholder={`Ingredient ${i + 1}`}
+              className="w-full border p-2 rounded mb-2"
+            />
+          ))}
+          <button
+            type="button"
+            onClick={() => addField("ingredients")}
+            className="bg-gray-200 px-3 py-1 rounded"
+          >
             + Add Ingredient
           </button>
         </div>
 
-        {/* Steps */}
         <div>
-          <label className="block text-sm font-medium mb-2">Steps</label>
-          
-            <SortableContext items={steps.map((_, i) => i)} strategy={verticalListSortingStrategy}>
-              {steps.map((step, index) => (
-                <SortableTextarea
-                  key={index}
-                  id={index}
-                  value={step}
-                  onChange={updateStep}
-                  placeholder={`Step ${index + 1}`}
-                />
-              ))}
-            </SortableContext>
-         
-          <button type="button" onClick={() => setSteps([...steps, ""])} className="text-sm text-red-500 hover:underline">
+          <h3 className="font-semibold mb-2">Steps</h3>
+          {formData.steps.map((step, i) => (
+            <input
+              key={i}
+              value={step}
+              onChange={(e) => handleArrayChange(i, e, "steps")}
+              placeholder={`Step ${i + 1}`}
+              className="w-full border p-2 rounded mb-2"
+            />
+          ))}
+          <button
+            type="button"
+            onClick={() => addField("steps")}
+            className="bg-gray-200 px-3 py-1 rounded"
+          >
             + Add Step
           </button>
         </div>
 
-        {/* Time, Difficulty, Cuisine, Category */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium">Prep Time</label>
-            <input type="text" value={prepTime} onChange={(e) => setPrepTime(e.target.value)} className="w-full border rounded px-4 py-2" required />
-          </div>
-          <div>
-            <label className="block text-sm font-medium">Cook Time</label>
-            <input type="text" value={cookTime} onChange={(e) => setCookTime(e.target.value)} className="w-full border rounded px-4 py-2" required />
-          </div>
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium">Difficulty</label>
-          <select value={difficulty} onChange={(e) => setDifficulty(e.target.value)} className="w-full border rounded px-4 py-2">
-            <option value="easy">Easy</option>
-            <option value="moderate">Moderate</option>
-            <option value="hard">Hard</option>
-          </select>
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium">Cuisine</label>
-          <select value={cuisine} onChange={(e) => setCuisine(e.target.value)} className="w-full border rounded px-4 py-2">
-            <option value="Italian">Italian</option>
-            <option value="Indian">Indian</option>
-            <option value="Nigerian">Nigerian</option>
-            <option value="Chinese">Chinese</option>
-            <option value="American">American</option>
-            <option value="French">French</option>
-            <option value="Other">Other</option>
-          </select>
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium">Category</label>
-          <select value={category} onChange={(e) => setCategory(e.target.value)} className="w-full border rounded px-4 py-2">
-            <option value="Dessert">Dessert</option>
-            <option value="Breakfast">Breakfast</option>
-            <option value="Lunch">Lunch</option>
-            <option value="Dinner">Dinner</option>
-            <option value="Snack">Snack</option>
-            <option value="Beverage">Beverage</option>
-            <option value="Appetizer">Appetizer</option>
-            <option value="Side Dish">Side Dish</option>
-            <option value="Other">Other</option>
-          </select>
-        </div>
-
-        <button type="submit" className="w-full sm:w-auto px-6 py-3 bg-red-500 text-white rounded hover:bg-red-700">
-          Submit Recipe
+        <button
+          type="submit"
+          className="bg-blue-600 text-white px-4 py-2 rounded mt-4"
+        >
+          Submit
         </button>
       </form>
     </div>
   );
-}
+};
+
+export default AddRecipe;

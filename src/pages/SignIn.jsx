@@ -1,6 +1,7 @@
 // src/pages/auth/SignIn.jsx
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
+// import { getCurrentUser, logoutUser, updateUser } from "../utils/authUtils";
 import axios from "axios";
 
 const MOCK_API_BASE_URL = "https://6862fce088359a373e93a76f.mockapi.io/api/v1";
