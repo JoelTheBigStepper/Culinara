@@ -1,11 +1,10 @@
-// src/utils/api.js
 import axios from "axios";
 
 const BASE_URL = "https://6862fce088359a373e93a76f.mockapi.io/api/v1";
 const RECIPE_ENDPOINT = `${BASE_URL}/recipe`;
 const USER_ENDPOINT = `${BASE_URL}/users`;
 
-// 🔹 Helper: sanitize recipe before sending to MockAPI
+// 🔹 Clean and normalize recipe data before sending to MockAPI
 const sanitizeRecipeData = (data) => {
   const sanitized = {
     title: String(data.title || ""),
@@ -26,60 +25,71 @@ const sanitizeRecipeData = (data) => {
       : [],
   };
 
-  console.log("🔍 Sanitized data:", sanitized);
   return sanitized;
 };
 
-// ✅ Recipes CRUD
-export const getAllRecipes = () =>
-  axios.get(RECIPE_ENDPOINT).then((res) => res.data);
-
-export const getRecipeById = (id) =>
-  axios.get(`${RECIPE_ENDPOINT}/${id}`).then((res) => res.data);
-
-export const addRecipe = async (data) => {
-  try {
-    const sanitized = sanitizeRecipeData(data);
-
-    // ✅ Convert arrays to strings for MockAPI
-    const payload = {
-      ...sanitized,
-      ingredients: JSON.stringify(sanitized.ingredients || []),
-      steps: JSON.stringify(sanitized.steps || []),
-    };
-
-    console.log("📤 Final payload to MockAPI:", payload);
-
-    const response = await axios.post(RECIPE_ENDPOINT, payload);
-    console.log("✅ MockAPI Response:", response.data);
-    return response;
-  } catch (error) {
-    console.error("❌ MockAPI Error Details:", {
-      message: error.message,
-      status: error.response?.status,
-      statusText: error.response?.statusText,
-      data: error.response?.data,
-    });
-    throw error;
-  }
+// 🔹 Parse recipe fields coming *from* MockAPI
+const parseRecipeData = (recipe) => {
+  const parsed = {
+    ...recipe,
+    ingredients:
+      typeof recipe.ingredients === "string"
+        ? JSON.parse(recipe.ingredients || "[]")
+        : recipe.ingredients || [],
+    steps:
+      typeof recipe.steps === "string"
+        ? JSON.parse(recipe.steps || "[]")
+        : recipe.steps || [],
+  };
+  return parsed;
 };
 
-export const updateRecipe = (id, data) => {
+// ✅ Recipes CRUD
+export const getAllRecipes = async () => {
+  const res = await axios.get(RECIPE_ENDPOINT);
+  return res.data.map(parseRecipeData); // parse all recipes for display
+};
+
+export const getRecipeById = async (id) => {
+  const res = await axios.get(`${RECIPE_ENDPOINT}/${id}`);
+  return parseRecipeData(res.data);
+};
+
+export const addRecipe = async (data) => {
   const sanitized = sanitizeRecipeData(data);
-  return axios.put(`${RECIPE_ENDPOINT}/${id}`, {
+  const payload = {
     ...sanitized,
     ingredients: JSON.stringify(sanitized.ingredients || []),
     steps: JSON.stringify(sanitized.steps || []),
-  });
+  };
+
+  const res = await axios.post(RECIPE_ENDPOINT, payload);
+  return parseRecipeData(res.data);
+};
+
+export const updateRecipe = async (id, data) => {
+  const sanitized = sanitizeRecipeData(data);
+  const payload = {
+    ...sanitized,
+    ingredients: JSON.stringify(sanitized.ingredients || []),
+    steps: JSON.stringify(sanitized.steps || []),
+  };
+
+  const res = await axios.put(`${RECIPE_ENDPOINT}/${id}`, payload);
+  return parseRecipeData(res.data);
 };
 
 export const deleteRecipe = (id) => axios.delete(`${RECIPE_ENDPOINT}/${id}`);
 
 // ✅ Users
-export const getAllUsers = () =>
-  axios.get(USER_ENDPOINT).then((res) => res.data);
+export const getAllUsers = async () => {
+  const res = await axios.get(USER_ENDPOINT);
+  return res.data;
+};
 
 export const createUser = (data) => axios.post(USER_ENDPOINT, data);
 
-export const getUserById = (id) =>
-  axios.get(`${USER_ENDPOINT}/${id}`).then((res) => res.data);
+export const getUserById = async (id) => {
+  const res = await axios.get(`${USER_ENDPOINT}/${id}`);
+  return res.data;
+};
