@@ -2,7 +2,7 @@
 import axios from "axios";
 
 const BASE_URL = "https://6862fce088359a373e93a76f.mockapi.io/api/v1";
-const RECIPE_ENDPOINT = `${BASE_URL}/recipes`;
+const RECIPE_ENDPOINT = `${BASE_URL}/recipe`;
 const USER_ENDPOINT = `${BASE_URL}/users`;
 
 // 🔹 Helper: sanitize recipe before sending to MockAPI
