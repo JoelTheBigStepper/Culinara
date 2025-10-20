@@ -72,12 +72,20 @@ export default function RecipeCard({ recipe, onLike, onShare, currentUserId }) {
         {/* ✅ Bookmark (Favorite) Button */}
         <button
           onClick={handleBookmark}
-          className="w-12 h-12 bg-white rounded-full p-1 m-2 cursor-pointer hover:bg-red-500 hover:text-white flex items-center justify-center"
+          className={`group w-10 h-10 bg-white rounded-full p-1 m-2 flex items-center justify-center transition-all duration-200 
+            ${isFavorite ? "ring-1 ring-red-400" : ""}
+            hover:bg-red-500 hover:scale-105`}
         >
           {isFavorite ? (
-            <BookmarkCheck className="text-red-500 hover:text-white" size={30} />
+            <BookmarkCheck
+              size={28}
+              className="text-red-500 transition-all duration-200 group-hover:text-white"
+            />
           ) : (
-            <Bookmark className="text-red-500 hover:text-white" size={30} />
+            <Bookmark
+              size={28}
+              className="text-red-500 transition-all duration-200 group-hover:text-white"
+            />
           )}
         </button>
       </div>
