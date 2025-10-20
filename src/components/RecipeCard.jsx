@@ -1,26 +1,49 @@
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Clock, UtensilsCrossed, ChefHat, Heart, Bookmark } from "lucide-react";
-import { useState } from "react";
-import { addFavoriteRecipe } from "../utils/api"; // we'll use this later
+import { getCurrentUser } from "../utils/authUtils";
+import { toggleFavorite, getUserFavorites } from "../utils/api";
 
-export default function RecipeCard({ recipe, currentUser, onLike, onBookmark }) {
-  const [isBookmarked, setIsBookmarked] = useState(false);
+export default function RecipeCard({ recipe, onLike, onShare }) {
+  const [favorites, setFavorites] = useState([]);
+  const [isHovered, setIsHovered] = useState(false);
+  const currentUser = getCurrentUser();
 
-  const handleBookmarkClick = async () => {
+  // ✅ Load user's favorites once on mount
+  useEffect(() => {
+    const fetchFavorites = async () => {
+      if (currentUser) {
+        try {
+          const favs = await getUserFavorites(currentUser.id);
+          setFavorites(favs);
+        } catch (err) {
+          console.error("Error fetching favorites:", err);
+        }
+      }
+    };
+    fetchFavorites();
+  }, [currentUser]);
+
+  // ✅ Handle add/remove favorite
+  const handleFavoriteClick = async (e) => {
+    e.preventDefault(); // Prevent link navigation
     if (!currentUser) {
-      alert("Please log in to add favorites");
+      alert("Please log in to add favorites.");
       return;
     }
 
     try {
-      setIsBookmarked(true);
-      await onBookmark(recipe.id);
-    } catch (err) {
-      console.error("Error adding favorite:", err);
-      alert("Failed to add to favorites");
+      const updated = await toggleFavorite(currentUser.id, recipe.id);
+      setFavorites(updated);
+    } catch (error) {
+      console.error("Error toggling favorite:", error);
     }
   };
 
+  // ✅ Check if current recipe is in favorites
+  const isFavorite = favorites.includes(recipe.id);
+
+  // ✅ Difficulty color
   const getDifficultyColor = (level) => {
     if (!level) return "text-gray-400";
     switch (level.toLowerCase()) {
@@ -36,18 +59,42 @@ export default function RecipeCard({ recipe, currentUser, onLike, onBookmark }) 
   };
 
   return (
-    <div className="bg-white rounded-xl transition p-2 relative shadow-sm hover:shadow-md">
+    <div
+      className="bg-white rounded-xl transition p-2 relative shadow-sm hover:shadow-md"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
+      {/* 🔹 Top-right icons */}
       <div className="absolute top-2 right-2 space-y-2 flex flex-col items-end">
+        {/* Like button (if any external like handler passed) */}
+        {onLike && (
+          <Heart
+            className="w-5 h-5 text-red-500 bg-white/80 rounded-full p-1 cursor-pointer hover:text-white hover:bg-red-500"
+            onClick={() => onLike(recipe.id)}
+          />
+        )}
+
+        {/* 🔹 Favorite (Bookmark) button */}
         <div
-          className={`flex items-center gap-1 bg-white/80 rounded-full px-2 py-1 cursor-pointer transition hover:bg-red-500 hover:text-white ${
-            isBookmarked ? "bg-red-500 text-white" : "text-red-500"
+          onClick={handleFavoriteClick}
+          className={`cursor-pointer rounded-full p-1 transition-all duration-10 ${
+            isHovered || isFavorite
+              ? "bg-red-500 text-white"
+              : "bg-white/80 text-red-500"
           }`}
-          onClick={handleBookmarkClick}
+          title={isFavorite ? "Remove from favorites" : "Add to favorites"}
         >
-          <Bookmark className="w-5 h-5" />
+          <Bookmark
+            size={18}
+            className={`transition-transform duration-10 ${
+              isHovered ? "scale-110" : "scale-100"
+            }`}
+            fill={isFavorite ? "currentColor" : "none"}
+          />
         </div>
       </div>
 
+      {/* 🔹 Recipe body */}
       <Link to={`/recipe/${recipe.id}`}>
         <img
           src={recipe.image}
@@ -58,6 +105,7 @@ export default function RecipeCard({ recipe, currentUser, onLike, onBookmark }) 
           <h3 className="font-semibold text-2xl hover:text-red-500 mt-1 mb-4 line-clamp-2">
             {recipe.title}
           </h3>
+
           <div className="grid grid-cols-2 gap-1 text-sm text-gray-500">
             <div className="flex items-center gap-1">
               <Clock size={16} className="text-gray-400" />
@@ -65,12 +113,14 @@ export default function RecipeCard({ recipe, currentUser, onLike, onBookmark }) 
                 {recipe.cookTime || recipe.time || "N/A"}
               </p>
             </div>
+
             <div className="flex items-center gap-1">
               <UtensilsCrossed size={16} className="text-gray-400" />
               <p className="font-medium text-md hover:text-red-500">
                 {recipe.cuisine || "N/A"}
               </p>
             </div>
+
             <div
               className={`flex items-center gap-1 ${getDifficultyColor(
                 recipe.difficulty || recipe.level

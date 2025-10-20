@@ -1,60 +1,89 @@
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import { getCurrentUser } from "../utils/authUtils";
-import { getAllRecipes } from "../utils/api";
+import { getUserFavorites, getAllRecipes, toggleFavorite } from "../utils/api";
 import RecipeCard from "../components/RecipeCard";
 
 export default function Favorites() {
-  const [recipes, setRecipes] = useState([]);
-  // const [favorites, setFavorites] = useState([]);
+  const [favoriteRecipes, setFavoriteRecipes] = useState([]);
+  const [loading, setLoading] = useState(true);
   const currentUser = getCurrentUser();
 
   useEffect(() => {
-    let mounted = true;
-    async function loadRecipes() {
-      try {
-        const data = await getAllRecipes();
-        if (mounted && Array.isArray(data)) {
-          setRecipes(data);
-        }
-      } catch (err) {
-        console.error("Failed to load recipes:", err);
+    const fetchFavorites = async () => {
+      if (!currentUser) {
+        setFavoriteRecipes([]);
+        setLoading(false);
+        return;
       }
-    }
-    loadRecipes();
-    return () => {
-      mounted = false;
+
+      try {
+        const userFavorites = await getUserFavorites(currentUser.id);
+        const allRecipes = await getAllRecipes();
+        const favorites = allRecipes.filter((recipe) =>
+          userFavorites.includes(recipe.id)
+        );
+        setFavoriteRecipes(favorites);
+      } catch (error) {
+        console.error("Error loading favorites:", error);
+      } finally {
+        setLoading(false);
+      }
     };
-  }, []);
 
-  const handleLike = (recipeId) => {
-    // placeholder: update UI optimistically or call API
-    console.log("like", recipeId);
+    fetchFavorites();
+  }, [currentUser]);
+
+  // ✅ Remove from favorites immediately after unbookmarking
+  const handleToggleFavorite = async (recipeId) => {
+    try {
+      const updated = await toggleFavorite(currentUser.id, recipeId);
+      const updatedFavorites = favoriteRecipes.filter((r) =>
+        updated.includes(r.id)
+      );
+      setFavoriteRecipes(updatedFavorites);
+    } catch (error) {
+      console.error("Error updating favorites:", error);
+    }
   };
 
-  const handleBookmark = (recipeId) => {
-    // placeholder: update UI optimistically or call API
-    console.log("bookmark", recipeId);
-  };
+  if (!currentUser) {
+    return (
+      <div className="text-center py-20">
+        <p className="text-lg text-gray-600">
+          Please log in to view your favorite recipes.
+        </p>
+      </div>
+    );
+  }
+
+  if (loading) {
+    return (
+      <div className="text-center py-20 text-gray-500 text-lg">Loading...</div>
+    );
+  }
+
+  if (favoriteRecipes.length === 0) {
+    return (
+      <div className="text-center py-20">
+        <p className="text-gray-600 text-lg">
+          You haven't added any recipes to your favorites yet.
+        </p>
+      </div>
+    );
+  }
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-8">
-      <h2 className="text-3xl font-bold mb-6">Your Favorites ❤️</h2>
-
-      {recipes.length > 0 ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-        {recipes.map((recipe) => (
+    <div className="px-4 sm:px-8 py-10">
+      <h2 className="text-3xl font-bold mb-8 text-center">Your Favorites ❤️</h2>
+      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
+        {favoriteRecipes.map((recipe) => (
           <RecipeCard
             key={recipe.id}
             recipe={recipe}
-            currentUser={currentUser} // ✅ Pass this
-            onLike={handleLike}
-            onBookmark={handleBookmark}
+            onToggleFavorite={() => handleToggleFavorite(recipe.id)}
           />
         ))}
-        </div>
-      ) : (
-        <p className="text-gray-600 text-center">No favorite recipes yet.</p>
-      )}
+      </div>
     </div>
   );
 }

@@ -45,8 +45,9 @@ const parseRecipeData = (recipe) => ({
 /* ✅ RECIPES CRUD */
 /* --------------------------------------------- */
 export const getAllRecipes = async () => {
-  const res = await axios.get(RECIPE_ENDPOINT);
-  return res.data.map(parseRecipeData);
+  const res = await fetch(`${BASE_URL}/recipe`);
+  if (!res.ok) throw new Error("Failed to fetch recipes");
+  return res.json();
 };
 
 export const getRecipeById = async (id) => {
@@ -105,10 +106,11 @@ export const getUserById = async (id) => {
 /* ✅ FAVORITES (stored in user object) */
 /* --------------------------------------------- */
 export const getUserFavorites = async (userId) => {
-  const res = await axios.get(`${USER_ENDPOINT}/${userId}`);
-  return res.data.favorites || [];
+  const res = await fetch(`${BASE_URL}/users/${userId}`);
+  if (!res.ok) throw new Error("Failed to fetch user");
+  const user = await res.json();
+  return user.favorites || [];
 };
-
 export const toggleFavorite = async (userId, recipeId) => {
   // Fetch user
   const res = await axios.get(`${USER_ENDPOINT}/${userId}`);
@@ -123,5 +125,11 @@ export const toggleFavorite = async (userId, recipeId) => {
   const updatedUser = { ...user, favorites: updatedFavorites };
   await axios.put(`${USER_ENDPOINT}/${userId}`, updatedUser);
 
+   await fetch(`${BASE_URL}/users/${userId}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ ...user, favorites: updatedFavorites }),
+  });
+  
   return updatedFavorites;
 };
