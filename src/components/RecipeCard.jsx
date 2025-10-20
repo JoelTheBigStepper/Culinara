@@ -1,7 +1,49 @@
 import { Link } from "react-router-dom";
-import { Clock, UtensilsCrossed, ChefHat, Heart, Bookmark } from "lucide-react";
+import {
+  Clock,
+  UtensilsCrossed,
+  ChefHat,
+  Heart,
+  Bookmark,
+  BookmarkCheck,
+} from "lucide-react";
+import { useEffect, useState } from "react";
+import { toggleFavorite, getUserById } from "../utils/api";
 
-export default function RecipeCard({ recipe, onLike, onShare }) {
+export default function RecipeCard({ recipe, onLike, onShare, currentUserId }) {
+  const [isFavorite, setIsFavorite] = useState(false);
+
+  // ✅ Check if recipe is already in favorites when component mounts
+  useEffect(() => {
+    const fetchFavoriteStatus = async () => {
+      if (!currentUserId) return;
+      try {
+        const user = await getUserById(currentUserId);
+        setIsFavorite(user.favorites?.includes(recipe.id));
+      } catch (err) {
+        console.error("Error checking favorite status:", err);
+      }
+    };
+    fetchFavoriteStatus();
+  }, [recipe.id, currentUserId]);
+
+  // ✅ Toggle favorite status
+  const handleBookmark = async (e) => {
+    e.preventDefault(); // prevent link navigation
+    if (!currentUserId) {
+      alert("Please log in to save favorites");
+      return;
+    }
+
+    try {
+      const updatedFavorites = await toggleFavorite(currentUserId, recipe.id);
+      setIsFavorite(updatedFavorites.includes(recipe.id));
+    } catch (err) {
+      console.error("Error updating favorite:", err);
+    }
+  };
+
+  // ✅ Difficulty color helper
   const getDifficultyColor = (level) => {
     if (!level) return "text-gray-400";
     switch (level.toLowerCase()) {
@@ -18,6 +60,7 @@ export default function RecipeCard({ recipe, onLike, onShare }) {
 
   return (
     <div className="bg-white rounded-xl transition p-2 relative shadow-sm hover:shadow-md">
+      {/* Top-right actions */}
       <div className="absolute top-2 right-2 space-y-2 flex flex-col items-end">
         {onLike && (
           <Heart
@@ -25,14 +68,21 @@ export default function RecipeCard({ recipe, onLike, onShare }) {
             onClick={() => onLike(recipe.id)}
           />
         )}
-        {onShare && (
-          <Bookmark
-            className="w-5 h-5 text-red-500 bg-white/80 rounded-full p-1 cursor-pointer hover:text-white hover:bg-red-500"
-            onClick={() => onShare(recipe.id)}
-          />
-        )}
+
+        {/* ✅ Bookmark (Favorite) Button */}
+        <button
+          onClick={handleBookmark}
+          className="w-12 h-12 bg-white rounded-full p-1 m-2 cursor-pointer hover:bg-red-500 hover:text-white flex items-center justify-center"
+        >
+          {isFavorite ? (
+            <BookmarkCheck className="text-red-500 hover:text-white" size={30} />
+          ) : (
+            <Bookmark className="text-red-500 hover:text-white" size={30} />
+          )}
+        </button>
       </div>
 
+      {/* Recipe content */}
       <Link to={`/recipe/${recipe.id}`}>
         <img
           src={recipe.image}
@@ -62,7 +112,9 @@ export default function RecipeCard({ recipe, onLike, onShare }) {
               )}`}
             >
               <ChefHat size={20} />
-              <p className="font-medium text-md">{recipe.difficulty || recipe.level || "N/A"}</p>
+              <p className="font-medium text-md">
+                {recipe.difficulty || recipe.level || "N/A"}
+              </p>
             </div>
           </div>
         </div>

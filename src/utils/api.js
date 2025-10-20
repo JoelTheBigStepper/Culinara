@@ -93,3 +93,31 @@ export const getUserById = async (id) => {
   const res = await axios.get(`${USER_ENDPOINT}/${id}`);
   return res.data;
 };
+// ✅ Favorites
+export const getFavorites = async (userId) => {
+  const user = await getUserById(userId);
+  if (!user.favorites) return [];
+  const recipes = await getAllRecipes();
+  return recipes.filter((recipe) => user.favorites.includes(recipe.id));
+};
+
+export const toggleFavorite = async (userId, recipeId) => {
+  const user = await getUserById(userId);
+  let favorites = user.favorites || [];
+
+  if (favorites.includes(recipeId)) {
+    favorites = favorites.filter((id) => id !== recipeId);
+  } else {
+    favorites.push(recipeId);
+  }
+
+  await axios.put(`${USER_ENDPOINT}/${userId}`, { ...user, favorites });
+  return favorites;
+};
+
+export const removeFavorite = async (userId, recipeId) => {
+  const user = await getUserById(userId);
+  const favorites = (user.favorites || []).filter((id) => id !== recipeId);
+  await axios.put(`${USER_ENDPOINT}/${userId}`, { ...user, favorites });
+  return favorites;
+};
