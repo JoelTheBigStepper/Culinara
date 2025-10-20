@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { getCurrentUser } from "../utils/authUtils";
 import { getAllRecipes } from "../utils/api";
-// import { getFavorites } from "../utils/favorites";
 import RecipeCard from "../components/RecipeCard";
 
 export default function Favorites() {
@@ -9,26 +8,33 @@ export default function Favorites() {
   // const [favorites, setFavorites] = useState([]);
   const currentUser = getCurrentUser();
 
-  // useEffect(() => {
-  //   if (!currentUser) return;
-  //   const favIds = getFavorites(currentUser.id);
-  //   setFavorites(favIds);
+  useEffect(() => {
+    let mounted = true;
+    async function loadRecipes() {
+      try {
+        const data = await getAllRecipes();
+        if (mounted && Array.isArray(data)) {
+          setRecipes(data);
+        }
+      } catch (err) {
+        console.error("Failed to load recipes:", err);
+      }
+    }
+    loadRecipes();
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
-  //   // fetch all recipes and filter only favorites
-  //   getAllRecipes().then((all) => {
-  //     const favRecipes = all.filter((r) => favIds.includes(r.id));
-  //     setRecipes(favRecipes);
-  //   });
-  // }, [currentUser]);
+  const handleLike = (recipeId) => {
+    // placeholder: update UI optimistically or call API
+    console.log("like", recipeId);
+  };
 
-  // if (!currentUser) {
-  //   return (
-  //     <div className="max-w-2xl mx-auto text-center py-16">
-  //       <h2 className="text-2xl font-semibold mb-2">Please Sign In</h2>
-  //       <p>You need to be signed in to view your favorite recipes.</p>
-  //     </div>
-  //   );
-  // }
+  const handleBookmark = (recipeId) => {
+    // placeholder: update UI optimistically or call API
+    console.log("bookmark", recipeId);
+  };
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-8">
@@ -36,9 +42,15 @@ export default function Favorites() {
 
       {recipes.length > 0 ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-          {recipes.map((recipe) => (
-            <RecipeCard key={recipe.id} recipe={recipe} />
-          ))}
+        {recipes.map((recipe) => (
+          <RecipeCard
+            key={recipe.id}
+            recipe={recipe}
+            currentUser={currentUser} // ✅ Pass this
+            onLike={handleLike}
+            onBookmark={handleBookmark}
+          />
+        ))}
         </div>
       ) : (
         <p className="text-gray-600 text-center">No favorite recipes yet.</p>
