@@ -93,31 +93,26 @@ export const getUserById = async (id) => {
   const res = await axios.get(`${USER_ENDPOINT}/${id}`);
   return res.data;
 };
-// ✅ Favorites
-export const getFavorites = async (userId) => {
-  const user = await getUserById(userId);
-  if (!user.favorites) return [];
-  const recipes = await getAllRecipes();
-  return recipes.filter((recipe) => user.favorites.includes(recipe.id));
+// ✅ FAVORITES (stored inside user object)
+export const getUserFavorites = async (userId) => {
+  const res = await axios.get(`${USER_ENDPOINT}/${userId}`);
+  return res.data.favorites || [];
 };
 
 export const toggleFavorite = async (userId, recipeId) => {
-  const user = await getUserById(userId);
-  let favorites = user.favorites || [];
+  const res = await axios.get(`${USER_ENDPOINT}/${userId}`);
+  const user = res.data;
 
-  if (favorites.includes(recipeId)) {
-    favorites = favorites.filter((id) => id !== recipeId);
-  } else {
-    favorites.push(recipeId);
-  }
+  const favorites = user.favorites || [];
+  const updatedFavorites = favorites.includes(recipeId)
+    ? favorites.filter((id) => id !== recipeId)
+    : [...favorites, recipeId];
 
-  await axios.put(`${USER_ENDPOINT}/${userId}`, { ...user, favorites });
-  return favorites;
-};
+  // ✅ Update user with new favorites
+  await axios.put(`${USER_ENDPOINT}/${userId}`, {
+    ...user,
+    favorites: updatedFavorites,
+  });
 
-export const removeFavorite = async (userId, recipeId) => {
-  const user = await getUserById(userId);
-  const favorites = (user.favorites || []).filter((id) => id !== recipeId);
-  await axios.put(`${USER_ENDPOINT}/${userId}`, { ...user, favorites });
-  return favorites;
+  return updatedFavorites;
 };

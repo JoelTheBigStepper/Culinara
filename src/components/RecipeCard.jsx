@@ -1,49 +1,27 @@
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import {
-  Clock,
-  UtensilsCrossed,
-  ChefHat,
-  Heart,
-  Bookmark,
-  BookmarkCheck,
-} from "lucide-react";
-import { useEffect, useState } from "react";
-import { toggleFavorite, getUserById } from "../utils/api";
+import { Clock, UtensilsCrossed, ChefHat, Heart, Bookmark } from "lucide-react";
+import { toggleFavorite, getUserFavorites } from "../utils/api";
 
-export default function RecipeCard({ recipe, onLike, onShare, currentUserId }) {
-  const [isFavorite, setIsFavorite] = useState(false);
+export default function RecipeCard({ recipe, currentUser }) {
+  const [favorites, setFavorites] = useState([]);
+  const isFavorite = favorites.includes(recipe.id);
 
-  // ✅ Check if recipe is already in favorites when component mounts
+  // ✅ Load user's favorites once
   useEffect(() => {
-    const fetchFavoriteStatus = async () => {
-      if (!currentUserId) return;
-      try {
-        const user = await getUserById(currentUserId);
-        setIsFavorite(user.favorites?.includes(recipe.id));
-      } catch (err) {
-        console.error("Error checking favorite status:", err);
-      }
-    };
-    fetchFavoriteStatus();
-  }, [recipe.id, currentUserId]);
+    if (currentUser?.id) {
+      getUserFavorites(currentUser.id).then(setFavorites);
+    }
+  }, [currentUser]);
 
-  // ✅ Toggle favorite status
   const handleBookmark = async (e) => {
-    e.preventDefault(); // prevent link navigation
-    if (!currentUserId) {
-      alert("Please log in to save favorites");
-      return;
-    }
+    e.preventDefault(); // prevent Link navigation
+    if (!currentUser) return alert("Please log in to add favorites");
 
-    try {
-      const updatedFavorites = await toggleFavorite(currentUserId, recipe.id);
-      setIsFavorite(updatedFavorites.includes(recipe.id));
-    } catch (err) {
-      console.error("Error updating favorite:", err);
-    }
+    const updated = await toggleFavorite(currentUser.id, recipe.id);
+    setFavorites(updated);
   };
 
-  // ✅ Difficulty color helper
   const getDifficultyColor = (level) => {
     if (!level) return "text-gray-400";
     switch (level.toLowerCase()) {
@@ -60,37 +38,17 @@ export default function RecipeCard({ recipe, onLike, onShare, currentUserId }) {
 
   return (
     <div className="bg-white rounded-xl transition p-2 relative shadow-sm hover:shadow-md">
-      {/* Top-right actions */}
-      <div className="absolute top-2 right-2 space-y-2 flex flex-col items-end">
-        {onLike && (
-          <Heart
-            className="w-5 h-5 text-red-500 bg-white/80 rounded-full p-1 cursor-pointer hover:text-white hover:bg-red-500"
-            onClick={() => onLike(recipe.id)}
-          />
-        )}
-
-        {/* ✅ Bookmark (Favorite) Button */}
-        <button
+      <div className="absolute top-2 right-2 flex flex-col items-end space-y-2">
+        <div
+          className={`w-7 h-7 rounded-full p-1 cursor-pointer transition ${
+            isFavorite ? "bg-red-500 text-white" : "bg-white/80 text-red-500"
+          } hover:bg-red-500 hover:text-white`}
           onClick={handleBookmark}
-          className={`group w-10 h-10 bg-white rounded-full p-1 m-2 flex items-center justify-center transition-all duration-200 
-            ${isFavorite ? "ring-1 ring-red-400" : ""}
-            hover:bg-red-500 hover:scale-105`}
         >
-          {isFavorite ? (
-            <BookmarkCheck
-              size={28}
-              className="text-red-500 transition-all duration-200 group-hover:text-white"
-            />
-          ) : (
-            <Bookmark
-              size={28}
-              className="text-red-500 transition-all duration-200 group-hover:text-white"
-            />
-          )}
-        </button>
+          <Bookmark className="w-5 h-5" />
+        </div>
       </div>
 
-      {/* Recipe content */}
       <Link to={`/recipe/${recipe.id}`}>
         <img
           src={recipe.image}
@@ -104,25 +62,19 @@ export default function RecipeCard({ recipe, onLike, onShare, currentUserId }) {
           <div className="grid grid-cols-2 gap-1 text-sm text-gray-500">
             <div className="flex items-center gap-1">
               <Clock size={16} className="text-gray-400" />
-              <p className="font-medium text-md hover:text-red-500">
-                {recipe.cookTime || recipe.time || "N/A"}
-              </p>
+              <p>{recipe.cookTime || "N/A"}</p>
             </div>
             <div className="flex items-center gap-1">
               <UtensilsCrossed size={16} className="text-gray-400" />
-              <p className="font-medium text-md hover:text-red-500">
-                {recipe.cuisine || "N/A"}
-              </p>
+              <p>{recipe.cuisine || "N/A"}</p>
             </div>
             <div
               className={`flex items-center gap-1 ${getDifficultyColor(
-                recipe.difficulty || recipe.level
+                recipe.difficulty
               )}`}
             >
               <ChefHat size={20} />
-              <p className="font-medium text-md">
-                {recipe.difficulty || recipe.level || "N/A"}
-              </p>
+              <p>{recipe.difficulty || "N/A"}</p>
             </div>
           </div>
         </div>

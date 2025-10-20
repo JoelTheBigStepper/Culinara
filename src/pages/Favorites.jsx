@@ -1,45 +1,48 @@
 import { useEffect, useState } from "react";
-import { getFavorites } from "../utils/api";
+import { getCurrentUser } from "../utils/authUtils";
+import { getAllRecipes } from "../utils/api";
+// import { getFavorites } from "../utils/favorites";
 import RecipeCard from "../components/RecipeCard";
 
-const Favorites = ({ currentUserId }) => {
-  const [favorites, setFavorites] = useState([]);
-  const [loading, setLoading] = useState(true);
+export default function Favorites() {
+  const [recipes, setRecipes] = useState([]);
+  // const [favorites, setFavorites] = useState([]);
+  const currentUser = getCurrentUser();
 
-  useEffect(() => {
-    const fetchFavorites = async () => {
-      try {
-        const favs = await getFavorites(currentUserId);
-        setFavorites(favs);
-      } catch (err) {
-        console.error("Error loading favorites:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchFavorites();
-  }, [currentUserId]);
+  // useEffect(() => {
+  //   if (!currentUser) return;
+  //   const favIds = getFavorites(currentUser.id);
+  //   setFavorites(favIds);
 
-  if (loading) return <p className="text-center mt-10">Loading favorites...</p>;
+  //   // fetch all recipes and filter only favorites
+  //   getAllRecipes().then((all) => {
+  //     const favRecipes = all.filter((r) => favIds.includes(r.id));
+  //     setRecipes(favRecipes);
+  //   });
+  // }, [currentUser]);
+
+  // if (!currentUser) {
+  //   return (
+  //     <div className="max-w-2xl mx-auto text-center py-16">
+  //       <h2 className="text-2xl font-semibold mb-2">Please Sign In</h2>
+  //       <p>You need to be signed in to view your favorite recipes.</p>
+  //     </div>
+  //   );
+  // }
 
   return (
-    <div className="px-4 py-8">
-      <h2 className="text-2xl font-bold mb-6">Your Favorites ❤️</h2>
-      {favorites.length === 0 ? (
-        <p>No favorite recipes yet.</p>
-      ) : (
+    <div className="max-w-6xl mx-auto px-4 py-8">
+      <h2 className="text-3xl font-bold mb-6">Your Favorites ❤️</h2>
+
+      {recipes.length > 0 ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-          {favorites.map((recipe) => (
-            <RecipeCard
-              key={recipe.id}
-              recipe={recipe}
-              currentUserId={currentUserId}
-            />
+          {recipes.map((recipe) => (
+            <RecipeCard key={recipe.id} recipe={recipe} />
           ))}
         </div>
+      ) : (
+        <p className="text-gray-600 text-center">No favorite recipes yet.</p>
       )}
     </div>
   );
-};
-
-export default Favorites;
+}
