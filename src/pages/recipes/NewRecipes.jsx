@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { getAllRecipes } from "../../utils/api"; 
+import { getAllRecipes } from "../../utils/api";
 
-// Calculate remaining time before recipe "expires"
+// 🔹 Calculate remaining time before recipe "expires" (24 hours)
 function getRemainingTime(createdAt) {
   const expirationTime = new Date(createdAt).getTime() + 24 * 60 * 60 * 1000;
   const now = Date.now();
@@ -10,7 +10,7 @@ function getRemainingTime(createdAt) {
   return remaining > 0 ? remaining : 0;
 }
 
-// Format time for display
+// 🔹 Format remaining time for display
 function formatTime(ms) {
   const totalSeconds = Math.floor(ms / 1000);
   const hours = Math.floor(totalSeconds / 3600);
@@ -27,9 +27,9 @@ export default function NewRecipes() {
   useEffect(() => {
     const fetchRecipes = async () => {
       try {
-        const res = await getAllRecipes();
-        const all = res.data || [];
+        const all = await getAllRecipes(); // ✅ directly returns array
 
+        // Filter recipes created in the last 24 hours
         const filtered = all
           .filter((recipe) => getRemainingTime(recipe.createdAt) > 0)
           .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
@@ -40,9 +40,10 @@ export default function NewRecipes() {
       }
     };
 
-    fetchRecipes(); // initial fetch
-    const interval = setInterval(fetchRecipes, 100000000); 
+    fetchRecipes();
 
+    // Optional: refresh occasionally (e.g. every 5 minutes)
+    const interval = setInterval(fetchRecipes, 5 * 60 * 1000);
     return () => clearInterval(interval);
   }, []);
 
