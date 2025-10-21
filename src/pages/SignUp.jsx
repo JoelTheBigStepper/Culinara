@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-// import { getCurrentUser, logoutUser, updateUser } from "../utils/authUtils";
 import axios from "axios";
+import { uploadImageToCloudinary } from "../utils/cloudinary"; // ✅ Cloudinary helper
+import toast, { Toaster } from "react-hot-toast";
 
-const MOCK_API_BASE_URL = "https://6862fce088359a373e93a76f.mockapi.io/api/v1"; // 🔁 Replace with your actual MockAPI base URL
+const MOCK_API_BASE_URL = "https://6862fce088359a373e93a76f.mockapi.io/api/v1";
 
 export default function SignUp() {
   const navigate = useNavigate();
@@ -15,15 +16,22 @@ export default function SignUp() {
   });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [uploading, setUploading] = useState(false);
 
-  const handleChange = (e) => {
+  const handleChange = async (e) => {
     const { name, value, files } = e.target;
-    if (name === "avatar") {
-      const reader = new FileReader();
-      reader.onload = () => {
-        setForm((prev) => ({ ...prev, avatar: reader.result }));
-      };
-      if (files[0]) reader.readAsDataURL(files[0]);
+
+    if (name === "avatar" && files && files[0]) {
+      setUploading(true);
+      try {
+        const imageUrl = await uploadImageToCloudinary(files[0]);
+        setForm((prev) => ({ ...prev, avatar: imageUrl }));
+        toast.success("Avatar uploaded successfully!");
+      } catch (err) {
+        toast.error("Avatar upload failed. Please try again.");
+      } finally {
+        setUploading(false);
+      }
     } else {
       setForm((prev) => ({ ...prev, [name]: value }));
     }
@@ -60,10 +68,11 @@ export default function SignUp() {
       );
 
       localStorage.setItem("currentUser", JSON.stringify(createdUser));
-      navigate("/profile");
+      toast.success("Account created successfully!");
+      setTimeout(() => navigate("/profile"), 1200);
     } catch (err) {
-      setError("Something went wrong. Please try again.");
       console.error(err);
+      setError("Something went wrong. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -71,8 +80,11 @@ export default function SignUp() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4 py-12">
+      <Toaster position="top-center" />
       <div className="w-full max-w-md bg-white rounded-xl shadow-xl p-8">
-        <h1 className="text-3xl font-bold text-center text-red-500 mb-6">Sign Up</h1>
+        <h1 className="text-3xl font-bold text-center text-red-500 mb-6">
+          Sign Up
+        </h1>
 
         {error && (
           <div className="bg-red-100 text-red-600 text-sm rounded px-4 py-2 mb-4">
@@ -138,14 +150,16 @@ export default function SignUp() {
               type="file"
               accept="image/*"
               onChange={handleChange}
+              disabled={uploading}
               className="w-full text-sm"
             />
+            {uploading && <p className="text-sm text-gray-500 mt-1">Uploading...</p>}
           </div>
 
           <button
             type="submit"
-            disabled={loading}
-            className="w-full bg-red-500 text-white font-semibold py-2 rounded-md hover:bg-red-600 transition"
+            disabled={loading || uploading}
+            className="w-full bg-red-500 text-white font-semibold py-2 rounded-md hover:bg-red-600 transition disabled:opacity-50"
           >
             {loading ? "Creating Account..." : "Sign Up"}
           </button>

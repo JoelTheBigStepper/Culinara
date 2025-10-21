@@ -58,7 +58,7 @@ export default function RecipeDetail() {
         <img
           src={recipe.image || "https://via.placeholder.com/400"}
           alt={recipe.title}
-          className="w-full md:w-1/2 rounded-lg shadow-lg object-cover"
+          className="w-full md:w-1/2 h-96 rounded-lg shadow-lg object-cover"
         />
 
         <div className="flex-1 space-y-4">

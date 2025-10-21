@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { getCurrentUser, updateUser } from "../utils/authUtils";
+import { uploadImageToCloudinary } from "../utils/cloudinary"; // ✅ Import helper
 import toast, { Toaster } from "react-hot-toast";
 
 export default function EditProfile() {
@@ -22,20 +23,12 @@ export default function EditProfile() {
   const handleChange = async (e) => {
     const { name, value, files } = e.target;
 
-    if (name === "avatar" && files[0]) {
+    // ✅ Handle image upload via Cloudinary helper
+    if (name === "avatar" && files && files[0]) {
       setUploading(true);
       try {
-        const data = new FormData();
-        data.append("file", files[0]);
-        data.append("upload_preset", "YOUR_UPLOAD_PRESET"); // replace with your preset
-
-        const res = await fetch(
-          `https://api.cloudinary.com/v1_1/YOUR_CLOUD_NAME/image/upload`,
-          { method: "POST", body: data }
-        );
-
-        const file = await res.json();
-        setForm((prev) => ({ ...prev, avatar: file.secure_url }));
+        const imageUrl = await uploadImageToCloudinary(files[0]);
+        setForm((prev) => ({ ...prev, avatar: imageUrl }));
         toast.success("Avatar uploaded successfully!");
       } catch (err) {
         toast.error("Avatar upload failed.");
