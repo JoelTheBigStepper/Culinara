@@ -1,101 +1,121 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { getAllRecipes } from "../utils/api";
+import { Search, Flame } from "lucide-react";
+import bgImage from "../assets/background.jpg";
 import RecipeSection from "../components/RecipeSection";
+import { getAllRecipes } from "../utils/api"; // ✅ Fetch from MockAPI
 
 export default function Home() {
-  const [recipes, setRecipes] = useState([]);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [tags, setTags] = useState([]);
   const navigate = useNavigate();
+  const [query, setQuery] = useState("");
+  const [tags, setTags] = useState([]);
 
-  // ✅ Fetch recipes from MockAPI
+  // ✅ Fetch tags (unique cuisines + categories)
   useEffect(() => {
-    const fetchRecipes = async () => {
+    const fetchTags = async () => {
       try {
-        const data = await getAllRecipes();
-        setRecipes(data);
+        const recipes = await getAllRecipes();
 
-        // ✅ Collect unique cuisines + categories for tags
-        const uniqueTags = Array.from(
-          new Set([
-            ...data.map((r) => r.cuisine).filter(Boolean),
-            ...data.map((r) => r.category).filter(Boolean),
-          ])
-        );
-        setTags(uniqueTags);
+        const tagSet = new Set();
+        recipes.forEach((r) => {
+          if (r.cuisine) tagSet.add(r.cuisine);
+          if (r.category) tagSet.add(r.category);
+        });
+
+        // show top 8 unique tags
+        setTags([...tagSet].slice(0, 8));
       } catch (error) {
-        console.error("Error fetching recipes:", error);
+        console.error("Failed to load tags:", error);
       }
     };
 
-    fetchRecipes();
+    fetchTags();
   }, []);
 
-  // ✅ Handle search submit
+  // ✅ Search Function
   const handleSearch = (e) => {
     e.preventDefault();
-    const trimmed = searchTerm.trim();
-    if (trimmed) {
-      navigate(`/search?query=${encodeURIComponent(trimmed)}`);
-      setSearchTerm("");
-    }
+    const trimmed = query.trim();
+    if (!trimmed) return;
+
+    // Save to recent searches
+    const prev = JSON.parse(localStorage.getItem("recentSearches")) || [];
+    const updated = [trimmed, ...prev.filter((q) => q !== trimmed)].slice(0, 10);
+    localStorage.setItem("recentSearches", JSON.stringify(updated));
+
+    // Navigate to search results page
+    navigate(`/search?query=${encodeURIComponent(trimmed)}`);
   };
 
-  // ✅ Handle tag click
+  // ✅ Tag Click Function
   const handleTagClick = (tag) => {
     navigate(`/search?query=${encodeURIComponent(tag)}`);
   };
 
   return (
-    <main className="max-w-7xl mx-auto px-4 py-8">
-      {/* 🌟 Hero Section with Search Bar */}
-      <section className="text-center mb-10">
-        <h1 className="text-4xl font-bold text-gray-800 mb-4">
-          Discover Delicious Recipes 🍲
-        </h1>
-        <p className="text-gray-600 mb-6">
-          Search for your favorite dishes, cuisines, or categories.
-        </p>
+    <div className="relative p-4 -mt-3">
+      {/* 🌅 Hero Section */}
+      <section className="relative min-h-[80vh] flex items-center justify-center overflow-hidden rounded-2xl">
+        <div
+          className="absolute inset-0 bg-cover bg-center"
+          style={{ backgroundImage: `url(${bgImage})` }}
+        ></div>
+        <div className="absolute inset-0 bg-black/40"></div>
 
-        {/* 🔍 Search Bar */}
-        <form
-          onSubmit={handleSearch}
-          className="flex flex-col sm:flex-row justify-center items-center gap-3"
-        >
-          <input
-            type="text"
-            placeholder="Search recipes..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full sm:w-96 border border-gray-300 rounded-md px-4 py-2 focus:ring-2 focus:ring-red-400 outline-none"
-          />
-          <button
-            type="submit"
-            className="bg-red-500 text-white font-semibold px-6 py-2 rounded-md hover:bg-red-600 transition"
+        <div className="relative z-10 text-center px-4">
+          <h1 className="text-white text-4xl md:text-6xl font-bold mb-2">
+            Discover & Share Amazing Recipes
+          </h1>
+          <h2 className="text-white text-lg md:text-xl font-light mb-12">
+            Find delicious meals by searching ingredients, cuisines, or recipe names.
+          </h2>
+
+          {/* 🔍 Search Bar */}
+          <form
+            onSubmit={handleSearch}
+            className="mx-auto mt-4 max-w-xl flex items-center bg-white rounded-lg overflow-hidden shadow-lg h-16"
           >
-            Search
-          </button>
-        </form>
+            <Search className="text-gray-400 ml-4" />
+            <input
+              type="text"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search for recipes..."
+              className="flex-grow px-4 h-full outline-none text-lg"
+            />
+            <button
+              type="submit"
+              className="bg-red-500 hover:bg-red-600 text-white px-6 h-full transition"
+            >
+              Search
+            </button>
+          </form>
+
+          {/* 🏷️ Tag Buttons */}
+          <div className="mt-6 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 justify-center">
+            {tags.map((tag) => (
+              <button
+                key={tag}
+                onClick={() => handleTagClick(tag)}
+                className="bg-white/20 hover:bg-white/30 text-white px-4 py-2 rounded-full transition"
+              >
+                {tag}
+              </button>
+            ))}
+          </div>
+        </div>
       </section>
 
-      {/* 🏷️ Dynamic Tags */}
-      {tags.length > 0 && (
-        <section className="flex flex-wrap justify-center gap-3 mb-10">
-          {tags.map((tag, index) => (
-            <button
-              key={index}
-              onClick={() => handleTagClick(tag)}
-              className="bg-gray-100 hover:bg-red-100 text-gray-700 hover:text-red-500 font-medium px-4 py-2 rounded-full transition"
-            >
-              {tag}
-            </button>
-          ))}
-        </section>
-      )}
+      {/* 🔥 Trending Section */}
+      <section className="max-w-7xl mx-auto px-4 py-12">
+        <div className="flex items-center gap-2 mb-6">
+          <Flame className="text-red-500" />
+          <h2 className="text-2xl font-bold">Trending This Week</h2>
+        </div>
 
-      {/* 🍽️ Recipe Sections */}
-      <RecipeSection title="Latest Recipes" recipes={recipes} />
-    </main>
+        {/* ✅ Show recipes dynamically */}
+        <RecipeSection />
+      </section>
+    </div>
   );
 }
