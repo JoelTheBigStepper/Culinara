@@ -1,7 +1,7 @@
 import { useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
 import RecipeCard from "../components/RecipeCard";
-import { getAllRecipes } from "../utils/api"; // ✅ Import MockAPI fetcher
+import { getAllRecipes } from "../utils/api"; // ✅ Fetch recipes from MockAPI
 
 export default function SearchResults() {
   const location = useLocation();
@@ -23,15 +23,23 @@ export default function SearchResults() {
 
       setLoading(true);
       try {
-        const allRecipes = await getAllRecipes(); // ✅ Fetch from MockAPI
+        const allRecipes = await getAllRecipes();
 
         const filtered = allRecipes.filter((recipe) => {
+          const ingredientsArray = Array.isArray(recipe.ingredients)
+            ? recipe.ingredients
+            : recipe.ingredients
+            ? recipe.ingredients.split(",")
+            : [];
+
           return (
             recipe.title?.toLowerCase().includes(searchQuery) ||
             recipe.cuisine?.toLowerCase().includes(searchQuery) ||
             recipe.category?.toLowerCase().includes(searchQuery) ||
             recipe.difficulty?.toLowerCase().includes(searchQuery) ||
-            recipe.ingredients?.some((ing) => ing.toLowerCase().includes(searchQuery))
+            ingredientsArray.some((ing) =>
+              ing.toLowerCase().includes(searchQuery)
+            )
           );
         });
 
