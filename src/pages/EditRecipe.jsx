@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { getRecipeById, updateRecipe } from "../../utils/api";
-import { uploadImageToCloudinary } from "../../utils/cloudinary";
+import { getRecipeById, updateRecipe } from "../utils/api";
+import { uploadImageToCloudinary } from "../utils/cloudinary";
 
 export default function EditRecipe() {
   const { id } = useParams();
@@ -13,14 +13,16 @@ export default function EditRecipe() {
   const [unauthorized, setUnauthorized] = useState(false);
   const [uploading, setUploading] = useState(false);
 
-  const currentUser = JSON.parse(localStorage.getItem("user"));
+ const currentUser = JSON.parse(localStorage.getItem("currentUser"));
+
 
   useEffect(() => {
     const fetchRecipe = async () => {
       try {
         const res = await getRecipeById(id);
 
-        if (!currentUser || res.userId !== currentUser.id) {
+        const currentUser = JSON.parse(localStorage.getItem("currentUser"));
+        if (!currentUser || String(res.userId) !== String(currentUser.id)) {
           setUnauthorized(true);
         } else {
           setRecipe(res);
@@ -34,7 +36,8 @@ export default function EditRecipe() {
     };
 
     fetchRecipe();
-  }, [id, currentUser]);
+  }, [id]);
+
 
   const handleChange = (e) => {
     const { name, value } = e.target;

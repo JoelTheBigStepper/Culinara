@@ -6,6 +6,7 @@ import Home from "./pages/Home";
 import SignUp from "./pages/SignUp";
 import SignIn from "./pages/SignIn";
 import EditProfile from "./pages/EditProfile";
+import EditRecipe from "./pages/EditRecipe";
 import RecipeDetail from "./pages/recipes/RecipeDetail";
 import AddRecipe from "./pages/AddRecipe";
 import MyRecipes from "./pages/recipes/MyRecipes";
@@ -39,6 +40,7 @@ function Layout() {
         <Route path="/signup" element={<SignUp />} />
         <Route path="/signin" element={<SignIn />} />
         <Route path="/edit-profile" element={<EditProfile />} />
+        <Route path="/edit-recipe/:id" element={<EditRecipe />} />
         <Route path="/recipe/:id" element={<RecipeDetail />} />
         <Route path="/add" element={<AddRecipe />} />
         <Route path="/recipes/my-recipes" element={<MyRecipes />} />
