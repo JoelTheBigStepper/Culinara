@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Search, Flame } from "lucide-react";
 import bgImage from "../assets/background.jpg";
 import RecipeSection from "../components/RecipeSection";
-import { getAllRecipes } from "../utils/api";
+import { getAllRecipes } from "../utils/api"; // ✅ now uses live data
 
 export default function Home() {
   const navigate = useNavigate();
@@ -11,37 +11,40 @@ export default function Home() {
   const [tags, setTags] = useState([]);
 
   useEffect(() => {
-    const fetchRecipes = async () => {
+    const fetchTags = async () => {
       try {
-        const recipes = await getAllRecipes(); // ✅ Now fetches from MockAPI
+        const recipes = await getAllRecipes();
 
+        // Collect all cuisines and categories
         const tagSet = new Set();
         recipes.forEach((r) => {
           if (r.cuisine) tagSet.add(r.cuisine);
           if (r.category) tagSet.add(r.category);
         });
 
-        setTags(Array.from(tagSet).slice(0, 8)); // Limit to 8 tags
-      } catch (err) {
-        console.error("Failed to fetch tags:", err);
+        setTags([...tagSet].slice(0, 8)); // show top 8 tags
+      } catch (error) {
+        console.error("Failed to load tags:", error);
       }
     };
 
-    fetchRecipes();
+    fetchTags();
   }, []);
 
-  const onSearch = (e) => {
+  const handleSearch = (e) => {
     e.preventDefault();
     if (!query.trim()) return;
 
-    // Save recent searches in localStorage for user convenience
+    // Save recent searches
     const prev = JSON.parse(localStorage.getItem("recentSearches")) || [];
-    localStorage.setItem(
-      "recentSearches",
-      JSON.stringify([query, ...prev.filter((q) => q !== query)].slice(0, 10))
-    );
+    const updated = [query, ...prev.filter((q) => q !== query)].slice(0, 10);
+    localStorage.setItem("recentSearches", JSON.stringify(updated));
 
     navigate(`/search?query=${encodeURIComponent(query)}`);
+  };
+
+  const handleTagClick = (tag) => {
+    navigate(`/search?query=${encodeURIComponent(tag)}`);
   };
 
   return (
@@ -52,11 +55,8 @@ export default function Home() {
           className="absolute inset-0 bg-cover bg-center"
           style={{ backgroundImage: `url(${bgImage})` }}
         ></div>
-
-        {/* Overlay */}
         <div className="absolute inset-0 bg-black/40"></div>
 
-        {/* Content */}
         <div className="relative z-10 text-center px-4">
           <h1 className="text-white text-4xl md:text-6xl font-bold mb-2">
             Discover & Share Amazing Recipes
@@ -67,7 +67,7 @@ export default function Home() {
 
           {/* Search Bar */}
           <form
-            onSubmit={onSearch}
+            onSubmit={handleSearch}
             className="mx-auto mt-4 max-w-xl flex items-center bg-white rounded-lg overflow-hidden shadow-lg h-16"
           >
             <Search className="text-gray-400 ml-4" />
@@ -86,12 +86,12 @@ export default function Home() {
             </button>
           </form>
 
-          {/* Dynamic Tags */}
+          {/* Tag Buttons */}
           <div className="mt-6 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 justify-center">
             {tags.map((tag) => (
               <button
                 key={tag}
-                onClick={() => navigate(`/search?query=${encodeURIComponent(tag)}`)}
+                onClick={() => handleTagClick(tag)}
                 className="bg-white/20 hover:bg-white/30 text-white px-4 py-2 rounded-full transition"
               >
                 {tag}
@@ -107,7 +107,6 @@ export default function Home() {
           <Flame className="text-red-500" />
           <h2 className="text-2xl font-bold">Trending This Week</h2>
         </div>
-
         <RecipeSection />
       </section>
     </div>
