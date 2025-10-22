@@ -260,9 +260,9 @@ export default function AddRecipe() {
             onChange={(e) => setDifficulty(e.target.value)}
             className="w-full border rounded px-4 py-2"
           >
-            <option value="easy">Easy</option>
-            <option value="moderate">Moderate</option>
-            <option value="hard">Hard</option>
+            <option value="beginner">Beginner</option>
+            <option value="intermediate">Intermediate</option>
+            <option value="advanced">Advanced</option>
           </select>
         </div>
 
@@ -275,11 +275,20 @@ export default function AddRecipe() {
             className="w-full border rounded px-4 py-2"
           >
             <option value="Nigerian">Nigerian</option>
+            <option value="Brazilian">Brazilian</option>
             <option value="Italian">Italian</option>
-            <option value="Indian">Indian</option>
+            <option value="Japanese">Japanese</option>
+            <option value="Korean">Korean</option>
             <option value="Chinese">Chinese</option>
+            <option value="German">German</option>
+            <option value="Mexican">Mexican</option>
+            <option value="Greek">Greek</option>
+            <option value="Indian">Indian</option>
+            <option value="Spanish">Spanish</option>
+            <option value="Thai">Thai</option>
             <option value="American">American</option>
             <option value="French">French</option>
+            <option value="Turkish">Turkish</option>
             <option value="Other">Other</option>
           </select>
         </div>
