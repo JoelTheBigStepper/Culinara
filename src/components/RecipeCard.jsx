@@ -47,11 +47,11 @@ export default function RecipeCard({ recipe, onLike, onShare }) {
   const getDifficultyColor = (level) => {
     if (!level) return "text-gray-400";
     switch (level.toLowerCase()) {
-      case "easy":
+      case "beginner":
         return "text-green-600";
-      case "moderate":
+      case "intermediate":
         return "text-yellow-600";
-      case "hard":
+      case "advanced":
         return "text-red-600";
       default:
         return "text-gray-400";

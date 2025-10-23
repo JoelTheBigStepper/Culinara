@@ -69,7 +69,7 @@ export default function SignUp() {
 
       localStorage.setItem("currentUser", JSON.stringify(createdUser));
       toast.success("Account created successfully!");
-      setTimeout(() => navigate("/profile"), 1200);
+      setTimeout(() => navigate("/home"), 1200);
     } catch (err) {
       console.error(err);
       setError("Something went wrong. Please try again.");

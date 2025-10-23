@@ -40,7 +40,7 @@ export default function SignIn() {
           sessionStorage.setItem("currentUser", JSON.stringify(safeUser));
         }
 
-        navigate("/profile");
+        navigate("/home");
       } else {
         setError("Invalid email or password.");
       }
