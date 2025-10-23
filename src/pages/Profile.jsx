@@ -101,10 +101,10 @@ export default function Profile() {
           </div>
 
           {/* Hamburger Menu (always visible) */}
-          <div className="absolute top-6 right-6">
+          <div className="absolute top-1 right-1">
             <button
               onClick={() => setMenuOpen(!menuOpen)}
-              className="p-2 rounded-md border border-gray-300 hover:bg-gray-100 transition"
+              className="p-2 rounded-md hover:bg-gray-100 transition"
             >
               {menuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
