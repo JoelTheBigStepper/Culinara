@@ -65,14 +65,15 @@ export default function RecipeCard({ recipe, onLike, onShare }) {
     >
       {/* 🔹 Top-right icons */}
       <div className="absolute top-4 right-4 space-y-2 flex flex-col items-end"
-         onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}      
+               
       >
         {/* Like button (if any external like handler passed) */}
         {onLike && (
           <Heart size={25}
             className="text-red-500 bg-white rounded-full p-1 m-2 cursor-pointer hover:text-white hover:bg-red-500"
             onClick={() => onLike(recipe.id)}
+            onMouseEnter={() => setIsHovered(true)}
+            onMouseLeave={() => setIsHovered(false)}
           />
         )}
 
@@ -92,6 +93,8 @@ export default function RecipeCard({ recipe, onLike, onShare }) {
               isHovered ? "scale-110" : "scale-100"
             }`}
             fill={isFavorite ? "currentColor" : "none"}
+            onMouseEnter={() => setIsHovered(true)}
+            onMouseLeave={() => setIsHovered(false)}
           />
         </div>
       </div>
