@@ -76,7 +76,7 @@ export default function Profile() {
                   Recipe{myRecipeCount !== 1 ? "s" : ""} Created
                 </p>
                 <Link
-                  to="/my-recipes"
+                  to="/recipes/my-recipes"
                   className="text-red-500 font-medium hover:underline mt-1 inline-block"
                 >
                   View My Recipes →
