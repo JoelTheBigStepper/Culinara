@@ -3,7 +3,6 @@ import { getCurrentUser, logoutUser } from "../utils/authUtils";
 import { useNavigate, Link } from "react-router-dom";
 import { getAllRecipes } from "../utils/api";
 import {
-  User,
   Mail,
   BookOpen,
   LogOut,
@@ -36,7 +35,7 @@ export default function Profile() {
           .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
         setMyRecipeCount(userRecipes.length);
-        setMyRecentRecipes(userRecipes.slice(0, 4)); // show 4 most recent
+        setMyRecentRecipes(userRecipes.slice(0, 4));
       } catch (err) {
         console.error("Failed to fetch recipes:", err);
       } finally {
@@ -101,35 +100,39 @@ export default function Profile() {
             )}
           </div>
 
-          {/* Hamburger Menu */}
-          <div className="absolute top-6 right-6 sm:hidden">
+          {/* Hamburger Menu (always visible) */}
+          <div className="absolute top-6 right-6">
             <button
               onClick={() => setMenuOpen(!menuOpen)}
-              className="p-2 rounded-md border border-gray-300 hover:bg-gray-100"
+              className="p-2 rounded-md border border-gray-300 hover:bg-gray-100 transition"
             >
               {menuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
           </div>
 
-          {/* Menu Buttons */}
-          <div
-            className={`${
-              menuOpen ? "flex" : "hidden sm:flex"
-            } flex-col sm:flex-row gap-4 mt-8 w-full sm:justify-center transition-all`}
-          >
-            <button
-              onClick={() => navigate("/edit-profile")}
-              className="bg-red-500 hover:bg-red-600 text-white py-2 px-6 rounded-lg flex items-center justify-center gap-2 transition"
-            >
-              <Edit3 className="w-4 h-4" /> Edit Profile
-            </button>
-            <button
-              onClick={handleLogout}
-              className="border border-red-500 text-red-500 hover:bg-red-50 py-2 px-6 rounded-lg flex items-center justify-center gap-2 transition"
-            >
-              <LogOut className="w-4 h-4" /> Logout
-            </button>
-          </div>
+          {/* Dropdown Menu */}
+          {menuOpen && (
+            <div className="absolute top-16 right-6 bg-white border border-gray-200 shadow-lg rounded-xl p-3 flex flex-col gap-2 w-48 animate-fadeIn z-20">
+              <button
+                onClick={() => {
+                  setMenuOpen(false);
+                  navigate("/edit-profile");
+                }}
+                className="flex items-center gap-2 px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-md transition"
+              >
+                <Edit3 className="w-4 h-4 text-red-500" /> Edit Profile
+              </button>
+              <button
+                onClick={() => {
+                  setMenuOpen(false);
+                  handleLogout();
+                }}
+                className="flex items-center gap-2 px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-md transition"
+              >
+                <LogOut className="w-4 h-4 text-red-500" /> Logout
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
@@ -156,15 +159,6 @@ export default function Profile() {
                 key={recipe.id}
                 className="bg-white rounded-xl shadow-md hover:shadow-lg transition transform hover:-translate-y-1 relative"
               >
-                {/* Edit Button (on hover) */}
-                <Link
-                  to={`/edit-recipe/${recipe.id}`}
-                  className="absolute top-3 right-3 bg-red-500 text-white p-2 rounded-md opacity-0 hover:opacity-100 transition"
-                  title="Edit Recipe"
-                >
-                  <Edit3 className="w-4 h-4" />
-                </Link>
-
                 <div className="h-40 w-full overflow-hidden rounded-t-xl">
                   <img
                     src={
