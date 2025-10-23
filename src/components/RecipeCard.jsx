@@ -6,7 +6,8 @@ import { toggleFavorite, getUserFavorites } from "../utils/api";
 
 export default function RecipeCard({ recipe, onLike, onShare }) {
   const [favorites, setFavorites] = useState([]);
-  const [isHovered, setIsHovered] = useState(false);
+  const [isHeartHovered, setIsHeartHovered] = useState(false);
+  const [isBookmarkHovered, setIsBookmarkHovered] = useState(false);
   const currentUser = getCurrentUser();
 
   // ✅ Load user's favorites once on mount
@@ -64,37 +65,48 @@ export default function RecipeCard({ recipe, onLike, onShare }) {
      
     >
       {/* 🔹 Top-right icons */}
-      <div className="absolute top-4 right-4 space-y-2 flex flex-col items-end"
-               
-      >
+      <div className="absolute top-4 right-4 space-y-2 flex flex-col items-end">
         {/* Like button (if any external like handler passed) */}
         {onLike && (
-          <Heart size={25}
-            className="text-red-500 bg-white rounded-full p-1 m-2 cursor-pointer hover:text-white hover:bg-red-500"
+          <div
             onClick={() => onLike(recipe.id)}
-            onMouseEnter={() => setIsHovered(true)}
-            onMouseLeave={() => setIsHovered(false)}
-          />
+            onMouseEnter={() => setIsHeartHovered(true)}
+            onMouseLeave={() => setIsHeartHovered(false)}
+            className={`cursor-pointer rounded-full p-2 transition-all duration-200 ${
+              isHeartHovered
+                ? "bg-red-500 text-white"
+                : "bg-white text-red-500"
+            }`}
+            title="Like this recipe"
+          >
+            <Heart
+              size={26}
+              className={`transition-transform duration-200 ${
+                isHeartHovered ? "scale-110" : "scale-100"
+              }`}
+              fill={isHeartHovered ? "currentColor" : "none"}
+            />
+          </div>
         )}
 
         {/* 🔹 Favorite (Bookmark) button */}
         <div
           onClick={handleFavoriteClick}
-          className={`cursor-pointer rounded-full p-1 transition-all duration-10 ${
-            isHovered || isFavorite
+          onMouseEnter={() => setIsBookmarkHovered(true)}
+          onMouseLeave={() => setIsBookmarkHovered(false)}
+          className={`cursor-pointer rounded-full p-2 transition-all duration-200 ${
+            isBookmarkHovered || isFavorite
               ? "bg-red-500 text-white"
               : "bg-white text-red-500"
           }`}
           title={isFavorite ? "Remove from favorites" : "Add to favorites"}
         >
           <Bookmark
-            size={25}
-            className={`transition-transform duration-10 ${
-              isHovered ? "scale-110" : "scale-100"
+            size={26}
+            className={`transition-transform duration-200 ${
+              isBookmarkHovered ? "scale-110" : "scale-100"
             }`}
             fill={isFavorite ? "currentColor" : "none"}
-            onMouseEnter={() => setIsHovered(true)}
-            onMouseLeave={() => setIsHovered(false)}
           />
         </div>
       </div>
