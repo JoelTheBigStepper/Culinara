@@ -2,12 +2,21 @@ import React, { useEffect, useState } from "react";
 import { getCurrentUser, logoutUser } from "../utils/authUtils";
 import { useNavigate, Link } from "react-router-dom";
 import { getAllRecipes } from "../utils/api";
-import { User, Mail, BookOpen, LogOut, Edit3, Calendar } from "lucide-react";
+import {
+  User,
+  Mail,
+  BookOpen,
+  LogOut,
+  Edit3,
+  Calendar,
+  ArrowRight,
+} from "lucide-react";
 
 export default function Profile() {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [myRecipeCount, setMyRecipeCount] = useState(0);
+  const [myRecentRecipes, setMyRecentRecipes] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -18,8 +27,12 @@ export default function Profile() {
     const fetchUserRecipes = async () => {
       try {
         const recipes = await getAllRecipes();
-        const userRecipes = recipes.filter((r) => r.userId === current.id);
+        const userRecipes = recipes
+          .filter((r) => r.userId === current.id)
+          .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
         setMyRecipeCount(userRecipes.length);
+        setMyRecentRecipes(userRecipes.slice(0, 4)); // show 4 most recent
       } catch (err) {
         console.error("Failed to fetch recipes:", err);
       } finally {
@@ -42,29 +55,25 @@ export default function Profile() {
     : "N/A";
 
   return (
-    <div className="max-w-3xl mx-auto px-6 py-10 mt-8">
+    <div className="max-w-5xl mx-auto px-6 py-10 mt-8">
+      {/* Profile Card */}
       <div className="bg-white shadow-lg rounded-2xl p-8 relative overflow-hidden">
-        {/* Decorative gradient ring */}
         <div className="absolute -top-20 -right-20 w-60 h-60 bg-red-100 rounded-full blur-3xl opacity-40" />
         <div className="relative flex flex-col items-center text-center z-10">
-          {/* Avatar */}
           <img
             src={user.avatar || "https://via.placeholder.com/100"}
             alt={`${user.name || "User"} avatar`}
             className="w-28 h-28 rounded-full object-cover border-4 border-red-500 shadow-lg"
           />
-
-          {/* User Info */}
           <h2 className="text-3xl font-bold mt-5">{user.name}</h2>
           <p className="text-gray-500 flex items-center justify-center gap-2 mt-1">
             <Mail className="w-4 h-4" /> {user.email}
           </p>
-
           <p className="text-gray-400 text-sm flex items-center justify-center gap-1 mt-1">
             <Calendar className="w-4 h-4" /> Joined {joinedDate}
           </p>
 
-          {/* Recipe stats */}
+          {/* Stats */}
           <div className="mt-8 w-full sm:w-3/4 bg-gray-50 rounded-xl py-4">
             {loading ? (
               <p className="text-gray-500 text-sm">Loading your recipes...</p>
@@ -76,10 +85,10 @@ export default function Profile() {
                   Recipe{myRecipeCount !== 1 ? "s" : ""} Created
                 </p>
                 <Link
-                  to="/recipes/my-recipes"
+                  to="/my-recipes"
                   className="text-red-500 font-medium hover:underline mt-1 inline-block"
                 >
-                  View My Recipes →
+                  View All Recipes →
                 </Link>
               </div>
             )}
@@ -93,7 +102,6 @@ export default function Profile() {
             >
               <Edit3 className="w-4 h-4" /> Edit Profile
             </button>
-
             <button
               onClick={handleLogout}
               className="border border-red-500 text-red-500 hover:bg-red-50 py-2 px-6 rounded-lg flex items-center justify-center gap-2 transition"
@@ -102,6 +110,56 @@ export default function Profile() {
             </button>
           </div>
         </div>
+      </div>
+
+      {/* Recent Recipes Section */}
+      <div className="mt-12">
+        <h3 className="text-2xl font-semibold text-gray-800 mb-6">
+          My Recent Recipes
+        </h3>
+
+        {loading ? (
+          <p className="text-gray-500">Loading recipes...</p>
+        ) : myRecentRecipes.length === 0 ? (
+          <p className="text-gray-500">
+            You haven’t added any recipes yet.{" "}
+            <Link to="/add-recipe" className="text-red-500 underline">
+              Create your first one!
+            </Link>
+          </p>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {myRecentRecipes.map((recipe) => (
+              <Link
+                to={`/recipe/${recipe.id}`}
+                key={recipe.id}
+                className="bg-white rounded-xl shadow-md hover:shadow-lg transition transform hover:-translate-y-1"
+              >
+                <div className="h-40 w-full overflow-hidden rounded-t-xl">
+                  <img
+                    src={
+                      recipe.image ||
+                      "https://via.placeholder.com/400x300?text=No+Image"
+                    }
+                    alt={recipe.title}
+                    className="w-full h-full object-cover transition duration-300 hover:scale-105"
+                  />
+                </div>
+                <div className="p-4">
+                  <h4 className="font-semibold text-gray-800 line-clamp-1">
+                    {recipe.title}
+                  </h4>
+                  <p className="text-gray-500 text-sm line-clamp-2 mt-1">
+                    {recipe.description}
+                  </p>
+                  <div className="flex items-center text-red-500 text-sm mt-2 font-medium">
+                    View Recipe <ArrowRight className="w-4 h-4 ml-1" />
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
