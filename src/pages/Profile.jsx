@@ -10,6 +10,9 @@ import {
   Edit3,
   Calendar,
   ArrowRight,
+  Menu,
+  X,
+  FileText,
 } from "lucide-react";
 
 export default function Profile() {
@@ -18,6 +21,7 @@ export default function Profile() {
   const [myRecipeCount, setMyRecipeCount] = useState(0);
   const [myRecentRecipes, setMyRecentRecipes] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
     const current = getCurrentUser();
@@ -55,16 +59,19 @@ export default function Profile() {
     : "N/A";
 
   return (
-    <div className="max-w-5xl mx-auto px-6 py-10 mt-8">
+    <div className="max-w-6xl mx-auto px-6 py-10 mt-8">
       {/* Profile Card */}
       <div className="bg-white shadow-lg rounded-2xl p-8 relative overflow-hidden">
         <div className="absolute -top-20 -right-20 w-60 h-60 bg-red-100 rounded-full blur-3xl opacity-40" />
         <div className="relative flex flex-col items-center text-center z-10">
+          {/* Avatar */}
           <img
             src={user.avatar || "https://via.placeholder.com/100"}
             alt={`${user.name || "User"} avatar`}
             className="w-28 h-28 rounded-full object-cover border-4 border-red-500 shadow-lg"
           />
+
+          {/* User Info */}
           <h2 className="text-3xl font-bold mt-5">{user.name}</h2>
           <p className="text-gray-500 flex items-center justify-center gap-2 mt-1">
             <Mail className="w-4 h-4" /> {user.email}
@@ -94,8 +101,22 @@ export default function Profile() {
             )}
           </div>
 
-          {/* Buttons */}
-          <div className="flex flex-col sm:flex-row gap-4 mt-8 w-full sm:justify-center">
+          {/* Hamburger Menu */}
+          <div className="absolute top-6 right-6 sm:hidden">
+            <button
+              onClick={() => setMenuOpen(!menuOpen)}
+              className="p-2 rounded-md border border-gray-300 hover:bg-gray-100"
+            >
+              {menuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+            </button>
+          </div>
+
+          {/* Menu Buttons */}
+          <div
+            className={`${
+              menuOpen ? "flex" : "hidden sm:flex"
+            } flex-col sm:flex-row gap-4 mt-8 w-full sm:justify-center transition-all`}
+          >
             <button
               onClick={() => navigate("/edit-profile")}
               className="bg-red-500 hover:bg-red-600 text-white py-2 px-6 rounded-lg flex items-center justify-center gap-2 transition"
@@ -112,7 +133,7 @@ export default function Profile() {
         </div>
       </div>
 
-      {/* Recent Recipes Section */}
+      {/* Recent Recipes */}
       <div className="mt-12">
         <h3 className="text-2xl font-semibold text-gray-800 mb-6">
           My Recent Recipes
@@ -133,8 +154,17 @@ export default function Profile() {
               <Link
                 to={`/recipe/${recipe.id}`}
                 key={recipe.id}
-                className="bg-white rounded-xl shadow-md hover:shadow-lg transition transform hover:-translate-y-1"
+                className="bg-white rounded-xl shadow-md hover:shadow-lg transition transform hover:-translate-y-1 relative"
               >
+                {/* Edit Button (on hover) */}
+                <Link
+                  to={`/edit-recipe/${recipe.id}`}
+                  className="absolute top-3 right-3 bg-red-500 text-white p-2 rounded-md opacity-0 hover:opacity-100 transition"
+                  title="Edit Recipe"
+                >
+                  <Edit3 className="w-4 h-4" />
+                </Link>
+
                 <div className="h-40 w-full overflow-hidden rounded-t-xl">
                   <img
                     src={
@@ -160,6 +190,39 @@ export default function Profile() {
             ))}
           </div>
         )}
+      </div>
+
+      {/* Blog Section */}
+      <div className="mt-16">
+        <h3 className="text-2xl font-semibold text-gray-800 mb-6">
+          My Blog Posts
+        </h3>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {[1, 2, 3, 4].map((i) => (
+            <div
+              key={i}
+              className="bg-white rounded-xl shadow-md hover:shadow-lg transition transform hover:-translate-y-1 p-5"
+            >
+              <div className="flex items-center justify-between mb-3">
+                <FileText className="w-5 h-5 text-red-500" />
+                <span className="text-xs text-gray-400">Oct {20 + i}, 2025</span>
+              </div>
+              <h4 className="font-semibold text-gray-800 mb-2">
+                How to Cook Like a Pro #{i}
+              </h4>
+              <p className="text-gray-500 text-sm line-clamp-3">
+                Discover essential kitchen skills, tricks, and time-saving tips
+                to improve your cooking game and elevate your recipes.
+              </p>
+              <Link
+                to="#"
+                className="text-red-500 text-sm font-medium mt-3 inline-flex items-center"
+              >
+                Read More <ArrowRight className="w-4 h-4 ml-1" />
+              </Link>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );
