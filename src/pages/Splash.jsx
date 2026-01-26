@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 import myImage from "../assets/chef-logo.png";
 import bgImage from "../assets/splash_bg.jpg";
 
+
+
 export default function Splash() {
   const navigate = useNavigate();
 
