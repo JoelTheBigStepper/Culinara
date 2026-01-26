@@ -70,7 +70,7 @@ export default function RecipeSection({ selectedTag = "" }) {
 
     console.log("🧮 Filtered Recipes:", filtered);
     setFilteredRecipes(filtered);
-  }, [activeTab, recipes, selectedTag]);
+  }, [activeTab, recipes, selectedTag, currentUser]);
 
   return (
     <section className="py-10 px-4 md:px-8">
@@ -108,7 +108,7 @@ export default function RecipeSection({ selectedTag = "" }) {
       ) : (
         <p className="text-gray-500 text-center mt-10">
           {selectedTag
-            ? `No recipes found for “${selectedTag}”.`
+            ? `No recipes found for "${selectedTag}".`
             : activeTab === "Favorites" && !currentUser
             ? "Please sign in to view your favorite recipes."
             : "No recipes found."}
