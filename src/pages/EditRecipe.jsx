@@ -13,9 +13,6 @@ export default function EditRecipe() {
   const [unauthorized, setUnauthorized] = useState(false);
   const [uploading, setUploading] = useState(false);
 
- const currentUser = JSON.parse(localStorage.getItem("currentUser"));
-
-
   useEffect(() => {
     const fetchRecipe = async () => {
       try {
