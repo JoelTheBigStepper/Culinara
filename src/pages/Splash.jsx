@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import myImage from "../assets/chef-logo.png";
+import myImage from "../assets/chef-logo1.png";
 import bgImage from "../assets/splash_bg.jpg";
 
 
@@ -26,7 +26,7 @@ export default function Splash() {
       }}
     >
       {/* Gradient overlay for readability */}
-      <div className="absolute inset-0 bg-black/40" />
+      <div className="absolute inset-0 bg-black/20" />
 
       {/* Content */}
       <div className="relative z-10 flex flex-col items-center">
@@ -34,7 +34,7 @@ export default function Splash() {
           src={myImage}
           loading="lazy"
           alt="Culinara logo"
- className="h-24 w-24 mb-6 animate-bounce-slow drop-shadow-[0_0_25px_rgba(255,255,255,0.8)]"
+          className="h-30 w-30 mb-1 animate-bounce-slow drop-shadow-[0_0_25px_rgba(255,255,255,0.8)]"
         />
         <h1 className="text-4xl font-bold text-[#FF6F61] drop-shadow-lg">
           Culinara
