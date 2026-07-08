@@ -1,19 +1,14 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import axios from "axios";
-import { uploadImageToCloudinary } from "../utils/cloudinary"; // ✅ Cloudinary helper
+import { uploadImageToCloudinary } from "../utils/cloudinary";
+import { useAuth } from "../context/AuthContext";
 import toast, { Toaster } from "react-hot-toast";
-
-const MOCK_API_BASE_URL = "https://6862fce088359a373e93a76f.mockapi.io/api/v1";
 
 export default function SignUp() {
   const navigate = useNavigate();
-  const [form, setForm] = useState({
-    name: "",
-    email: "",
-    password: "",
-    avatar: ""
-  });
+  const { register } = useAuth();
+
+  const [form, setForm] = useState({ name: "", email: "", password: "", avatar: "" });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -26,9 +21,9 @@ export default function SignUp() {
       try {
         const imageUrl = await uploadImageToCloudinary(files[0]);
         setForm((prev) => ({ ...prev, avatar: imageUrl }));
-        toast.success("Avatar uploaded successfully!");
-      } catch (err) {
-        toast.error("Avatar upload failed. Please try again.");
+        toast.success("Avatar uploaded!");
+      } catch {
+        toast.error("Avatar upload failed.");
       } finally {
         setUploading(false);
       }
@@ -39,40 +34,14 @@ export default function SignUp() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
     setError("");
-
+    setLoading(true);
     try {
-      // Check if email already exists
-      const { data: users } = await axios.get(`${MOCK_API_BASE_URL}/users`);
-      const emailExists = users.some(
-        (u) => u.email === form.email.trim().toLowerCase()
-      );
-      if (emailExists) {
-        setError("Email already exists.");
-        setLoading(false);
-        return;
-      }
-
-      // Create new user
-      const newUser = {
-        name: form.name,
-        email: form.email.trim().toLowerCase(),
-        password: form.password,
-        avatar: form.avatar
-      };
-
-      const { data: createdUser } = await axios.post(
-        `${MOCK_API_BASE_URL}/users`,
-        newUser
-      );
-
-      localStorage.setItem("currentUser", JSON.stringify(createdUser));
-      toast.success("Account created successfully!");
-      setTimeout(() => navigate("/home"), 1200);
+      await register(form);
+      toast.success("Account created!");
+      setTimeout(() => navigate("/home"), 1000);
     } catch (err) {
-      console.error(err);
-      setError("Something went wrong. Please try again.");
+      setError(err.message || "Registration failed.");
     } finally {
       setLoading(false);
     }
@@ -82,23 +51,16 @@ export default function SignUp() {
     <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4 py-12">
       <Toaster position="top-center" />
       <div className="w-full max-w-md bg-white rounded-xl shadow-xl p-8">
-        <h1 className="text-3xl font-bold text-center text-red-500 mb-6">
-          Sign Up
-        </h1>
+        <h1 className="text-3xl font-bold text-center text-red-500 mb-6">Sign Up</h1>
 
         {error && (
-          <div className="bg-red-100 text-red-600 text-sm rounded px-4 py-2 mb-4">
-            {error}
-          </div>
+          <div className="bg-red-100 text-red-600 text-sm rounded px-4 py-2 mb-4">{error}</div>
         )}
 
         <form onSubmit={handleSubmit} className="space-y-5">
           <div>
-            <label htmlFor="name" className="block mb-1 font-medium text-gray-700">
-              Full Name
-            </label>
+            <label className="block mb-1 font-medium text-gray-700">Full Name</label>
             <input
-              id="name"
               name="name"
               type="text"
               value={form.name}
@@ -109,11 +71,8 @@ export default function SignUp() {
           </div>
 
           <div>
-            <label htmlFor="email" className="block mb-1 font-medium text-gray-700">
-              Email
-            </label>
+            <label className="block mb-1 font-medium text-gray-700">Email</label>
             <input
-              id="email"
               name="email"
               type="email"
               value={form.email}
@@ -125,11 +84,8 @@ export default function SignUp() {
           </div>
 
           <div>
-            <label htmlFor="password" className="block mb-1 font-medium text-gray-700">
-              Password
-            </label>
+            <label className="block mb-1 font-medium text-gray-700">Password</label>
             <input
-              id="password"
               name="password"
               type="password"
               value={form.password}
@@ -141,11 +97,10 @@ export default function SignUp() {
           </div>
 
           <div>
-            <label htmlFor="avatar" className="block mb-1 font-medium text-gray-700">
+            <label className="block mb-1 font-medium text-gray-700">
               Upload Avatar (Optional)
             </label>
             <input
-              id="avatar"
               name="avatar"
               type="file"
               accept="image/*"
@@ -167,9 +122,7 @@ export default function SignUp() {
 
         <p className="text-center text-sm text-gray-600 mt-6">
           Already have an account?{" "}
-          <Link to="/signin" className="text-red-500 hover:underline">
-            Sign In
-          </Link>
+          <Link to="/signin" className="text-red-500 hover:underline">Sign In</Link>
         </p>
       </div>
     </div>
