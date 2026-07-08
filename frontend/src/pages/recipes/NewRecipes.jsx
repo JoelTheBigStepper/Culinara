@@ -2,21 +2,17 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { getAllRecipes } from "../../utils/api";
 
-// 🔹 Calculate remaining time before recipe "expires" (24 hours)
 function getRemainingTime(createdAt) {
   const expirationTime = new Date(createdAt).getTime() + 24 * 60 * 60 * 1000;
-  const now = Date.now();
-  const remaining = expirationTime - now;
+  const remaining = expirationTime - Date.now();
   return remaining > 0 ? remaining : 0;
 }
 
-// 🔹 Format remaining time for display
 function formatTime(ms) {
   const totalSeconds = Math.floor(ms / 1000);
   const hours = Math.floor(totalSeconds / 3600);
   const minutes = Math.floor((totalSeconds % 3600) / 60);
   const seconds = totalSeconds % 60;
-
   const pad = (n) => String(n).padStart(2, "0");
   return `${pad(hours)}h ${pad(minutes)}m ${pad(seconds)}s`;
 }
@@ -27,13 +23,10 @@ export default function NewRecipes() {
   useEffect(() => {
     const fetchRecipes = async () => {
       try {
-        const all = await getAllRecipes(); // ✅ directly returns array
-
-        // Filter recipes created in the last 24 hours
+        const all = await getAllRecipes();
         const filtered = all
-          .filter((recipe) => getRemainingTime(recipe.createdAt) > 0)
+          .filter((r) => getRemainingTime(r.createdAt) > 0)
           .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-
         setRecipes(filtered);
       } catch (err) {
         console.error("Failed to fetch recipes:", err);
@@ -41,8 +34,6 @@ export default function NewRecipes() {
     };
 
     fetchRecipes();
-
-    // Optional: refresh occasionally (e.g. every 5 minutes)
     const interval = setInterval(fetchRecipes, 5 * 60 * 1000);
     return () => clearInterval(interval);
   }, []);
@@ -59,8 +50,8 @@ export default function NewRecipes() {
             const timeLeft = getRemainingTime(recipe.createdAt);
             return (
               <Link
-                key={recipe.id}
-                to={`/recipe/${recipe.id}`}
+                key={recipe._id}
+                to={`/recipe/${recipe._id}`}
                 className="bg-white rounded-xl border hover:shadow-md transition overflow-hidden"
               >
                 <img

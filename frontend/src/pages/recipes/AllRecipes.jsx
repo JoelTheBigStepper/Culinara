@@ -20,22 +20,22 @@ export default function AllRecipes() {
   const handleFilter = (recipe) => {
     const matchesSearch =
       recipe.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      recipe.ingredients?.join(", ").toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (recipe.ingredients || []).join(", ").toLowerCase().includes(searchQuery.toLowerCase()) ||
       recipe.cuisine?.toLowerCase().includes(searchQuery.toLowerCase());
 
     const matchesCuisine =
-      filterCuisine === "All" || recipe.cuisine?.toLowerCase() === filterCuisine.toLowerCase();
+      filterCuisine === "All" ||
+      recipe.cuisine?.toLowerCase() === filterCuisine.toLowerCase();
 
     const matchesDifficulty =
       filterDifficulty === "All" ||
-      (recipe.difficulty && recipe.difficulty.toLowerCase() === filterDifficulty.toLowerCase());
+      recipe.difficulty?.toLowerCase() === filterDifficulty.toLowerCase();
 
     return matchesSearch && matchesCuisine && matchesDifficulty;
   };
 
   const sortedFilteredRecipes = () => {
     let filtered = recipes.filter(handleFilter);
-
     switch (sortOrder) {
       case "latest":
         filtered.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
@@ -49,18 +49,16 @@ export default function AllRecipes() {
       default:
         break;
     }
-
     return filtered;
   };
 
   const uniqueCuisines = ["All", ...new Set(recipes.map((r) => r.cuisine).filter(Boolean))];
-  const difficulties = ["All", "Easy", "Moderate", "Hard"];
+  const difficulties = ["All", "beginner", "intermediate", "advanced"];
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <h2 className="text-3xl font-bold mb-6 text-center sm:text-left">All Recipes</h2>
 
-      {/* Filters & Sorting */}
       <div className="flex flex-col sm:flex-row sm:flex-wrap gap-4 mb-6 items-stretch sm:items-center">
         <input
           type="text"
@@ -69,31 +67,24 @@ export default function AllRecipes() {
           onChange={(e) => setSearchQuery(e.target.value)}
           className="border border-gray-300 px-3 py-2 rounded-md w-full sm:w-60"
         />
-
         <select
           value={filterCuisine}
           onChange={(e) => setFilterCuisine(e.target.value)}
           className="border px-3 py-2 rounded-md w-full sm:w-40"
         >
-          {uniqueCuisines.map((cuisine) => (
-            <option key={cuisine} value={cuisine}>
-              {cuisine}
-            </option>
-          ))}
+          {uniqueCuisines.map((c) => <option key={c} value={c}>{c}</option>)}
         </select>
-
         <select
           value={filterDifficulty}
           onChange={(e) => setFilterDifficulty(e.target.value)}
           className="border px-3 py-2 rounded-md w-full sm:w-48"
         >
-          {difficulties.map((level) => (
-            <option key={level} value={level}>
-              {level}
+          {difficulties.map((d) => (
+            <option key={d} value={d}>
+              {d === "All" ? "All Difficulties" : d.charAt(0).toUpperCase() + d.slice(1)}
             </option>
           ))}
         </select>
-
         <select
           value={sortOrder}
           onChange={(e) => setSortOrder(e.target.value)}
@@ -105,7 +96,6 @@ export default function AllRecipes() {
         </select>
       </div>
 
-      {/* Recipe Grid */}
       {loading ? (
         <p className="text-gray-500 text-center">Loading recipes...</p>
       ) : sortedFilteredRecipes().length === 0 ? (
@@ -113,7 +103,7 @@ export default function AllRecipes() {
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {sortedFilteredRecipes().map((recipe) => (
-            <RecipeCard key={recipe.id} recipe={recipe} />
+            <RecipeCard key={recipe._id} recipe={recipe} />
           ))}
         </div>
       )}
