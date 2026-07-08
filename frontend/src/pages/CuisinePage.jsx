@@ -1,7 +1,7 @@
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { Clock, UtensilsCrossed, ChefHat } from "lucide-react";
-import { getAllRecipes } from "../utils/api"; // ✅ Add this line
+import { getAllRecipes } from "../utils/api";
 
 export default function CuisinePage() {
   const { cuisine } = useParams();
@@ -13,54 +13,40 @@ export default function CuisinePage() {
   const [sortBy, setSortBy] = useState("");
 
   useEffect(() => {
-    const fetchRecipes = async () => {
-      try {
-        const recipes = await getAllRecipes(); // ✅ Fetch from API
+    getAllRecipes()
+      .then((recipes) => {
         const filtered = recipes.filter(
           (r) => r.cuisine?.toLowerCase() === cuisine.toLowerCase()
         );
         setAllRecipes(filtered);
         setFilteredRecipes(filtered);
-      } catch (error) {
-        console.error("Error fetching recipes:", error);
-      }
-    };
-
-    fetchRecipes();
+      })
+      .catch(console.error);
   }, [cuisine]);
 
   useEffect(() => {
     let results = [...allRecipes];
-
     if (searchTerm.trim()) {
-      results = results.filter((recipe) =>
-        recipe.title.toLowerCase().includes(searchTerm.toLowerCase())
+      results = results.filter((r) =>
+        r.title.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
-
-    if (sortBy === "cookTime") {
-      results.sort((a, b) => parseInt(a.cookTime) - parseInt(b.cookTime));
-    } else if (sortBy === "title") {
-      results.sort((a, b) => a.title.localeCompare(b.title));
-    } else if (sortBy === "difficulty") {
-      const order = { easy: 1, moderate: 2, hard: 3 };
-      results.sort((a, b) => order[a.difficulty?.toLowerCase()] - order[b.difficulty?.toLowerCase()]);
+    if (sortBy === "cookTime") results.sort((a, b) => parseInt(a.cookTime) - parseInt(b.cookTime));
+    else if (sortBy === "title") results.sort((a, b) => a.title.localeCompare(b.title));
+    else if (sortBy === "difficulty") {
+      const order = { beginner: 1, intermediate: 2, advanced: 3 };
+      results.sort((a, b) => (order[a.difficulty] || 0) - (order[b.difficulty] || 0));
     }
-
     setFilteredRecipes(results);
   }, [searchTerm, sortBy, allRecipes]);
 
   const getDifficultyColor = (level) => {
     if (!level) return "text-gray-400";
     switch (level.toLowerCase()) {
-      case "easy":
-        return "text-green-600";
-      case "moderate":
-        return "text-yellow-600";
-      case "hard":
-        return "text-red-600";
-      default:
-        return "text-gray-400";
+      case "beginner": return "text-green-600";
+      case "intermediate": return "text-yellow-600";
+      case "advanced": return "text-red-600";
+      default: return "text-gray-400";
     }
   };
 
@@ -79,7 +65,6 @@ export default function CuisinePage() {
             ← Back to All Cuisines
           </button>
         </div>
-
         <div className="flex flex-col sm:flex-row gap-2">
           <input
             type="text"
@@ -107,8 +92,8 @@ export default function CuisinePage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {filteredRecipes.map((recipe) => (
             <Link
-              key={recipe.id}
-              to={`/recipe/${recipe.id}`}
+              key={recipe._id}
+              to={`/recipe/${recipe._id}`}
               className="bg-white rounded-xl transition p-2 relative shadow-sm hover:shadow-md"
             >
               <img
@@ -123,25 +108,15 @@ export default function CuisinePage() {
                 <div className="grid grid-cols-2 gap-1 text-sm text-gray-500">
                   <div className="flex items-center gap-1">
                     <Clock size={16} className="text-gray-400" />
-                    <p className="font-medium text-md hover:text-red-500">
-                      {recipe.cookTime}
-                    </p>
+                    <p className="font-medium hover:text-red-500">{recipe.cookTime}</p>
                   </div>
                   <div className="flex items-center gap-1">
                     <UtensilsCrossed size={16} className="text-gray-400" />
-                    <p className="font-medium text-md hover:text-red-500">
-                      {recipe.cuisine || "N/A"}
-                    </p>
+                    <p className="font-medium hover:text-red-500">{recipe.cuisine || "N/A"}</p>
                   </div>
-                  <div
-                    className={`flex items-center gap-1 ${getDifficultyColor(
-                      recipe.difficulty
-                    )}`}
-                  >
+                  <div className={`flex items-center gap-1 ${getDifficultyColor(recipe.difficulty)}`}>
                     <ChefHat size={20} />
-                    <p className="font-medium text-md">
-                      {recipe.difficulty || "N/A"}
-                    </p>
+                    <p className="font-medium">{recipe.difficulty || "N/A"}</p>
                   </div>
                 </div>
               </div>

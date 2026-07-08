@@ -1,7 +1,7 @@
 import { useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
 import RecipeCard from "../components/RecipeCard";
-import { getAllRecipes } from "../utils/api"; // ✅ Fetch recipes from MockAPI
+import { getAllRecipes } from "../utils/api";
 
 export default function SearchResults() {
   const location = useLocation();
@@ -24,25 +24,16 @@ export default function SearchResults() {
       setLoading(true);
       try {
         const allRecipes = await getAllRecipes();
-
         const filtered = allRecipes.filter((recipe) => {
-          const ingredientsArray = Array.isArray(recipe.ingredients)
-            ? recipe.ingredients
-            : recipe.ingredients
-            ? recipe.ingredients.split(",")
-            : [];
-
+          const ingredients = Array.isArray(recipe.ingredients) ? recipe.ingredients : [];
           return (
             recipe.title?.toLowerCase().includes(searchQuery) ||
             recipe.cuisine?.toLowerCase().includes(searchQuery) ||
             recipe.category?.toLowerCase().includes(searchQuery) ||
             recipe.difficulty?.toLowerCase().includes(searchQuery) ||
-            ingredientsArray.some((ing) =>
-              ing.toLowerCase().includes(searchQuery)
-            )
+            ingredients.some((ing) => ing.toLowerCase().includes(searchQuery))
           );
         });
-
         setResults(filtered);
       } catch (error) {
         console.error("Error fetching recipes:", error);
@@ -58,8 +49,7 @@ export default function SearchResults() {
   return (
     <section className="max-w-7xl mx-auto px-4 py-8">
       <h2 className="text-2xl sm:text-3xl font-bold mb-6">
-        Search Results for{" "}
-        <span className="text-red-500">“{query || "..."}”</span>
+        Search Results for <span className="text-red-500">"{query || "..."}"</span>
       </h2>
 
       {loading ? (
@@ -71,7 +61,7 @@ export default function SearchResults() {
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
           {results.map((recipe) => (
-            <RecipeCard key={recipe.id} recipe={recipe} />
+            <RecipeCard key={recipe._id} recipe={recipe} />
           ))}
         </div>
       )}
