@@ -1,27 +1,29 @@
 // src/utils/cloudinary.js
-import axios from "axios";
+// All uploads now go through the backend — no Cloudinary credentials on the client.
 
-// Replace with your Cloudinary details
-const CLOUD_NAME = "dbjsaynct";
-const UPLOAD_PRESET = "recipe_upload"; // Unsigned preset name from Cloudinary
+import { apiFetch } from "./api";
 
-export const uploadImageToCloudinary = async (file) => {
+/**
+ * Upload an image file via the backend.
+ * @param {File} file - The image file to upload
+ * @param {"recipes"|"avatars"} folder - Cloudinary folder to store in
+ * @returns {Promise<string>} The secure Cloudinary URL
+ */
+export const uploadImageToCloudinary = async (file, folder = "recipes") => {
   const formData = new FormData();
-  formData.append("file", file);
-  formData.append("upload_preset", UPLOAD_PRESET);
+  formData.append("image", file);
 
-  try {
-    const res = await axios.post(
-      `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`,
-      formData,
-      {
-        headers: { "Content-Type": "multipart/form-data" },
-      }
-    );
+  const res = await apiFetch(`/upload/image?folder=${folder}`, {
+    method: "POST",
+    body: formData,
+    headers: {}, // let browser set Content-Type with boundary for multipart
+  });
 
-    return res.data.secure_url; // ✅ Cloudinary hosted image URL
-  } catch (err) {
-    console.error("Cloudinary upload error:", err.response?.data || err.message);
-    throw new Error("Image upload failed. Please try again.");
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.message || "Image upload failed");
   }
+
+  const data = await res.json();
+  return data.url;
 };

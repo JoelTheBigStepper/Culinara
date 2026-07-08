@@ -34,12 +34,15 @@ const processQueue = (error, token = null) => {
 export const apiFetch = async (endpoint, options = {}) => {
   const url = `${BASE_URL}${endpoint}`;
 
+  const isFormData = options.body instanceof FormData;
+
   const makeRequest = (token) =>
     fetch(url, {
       ...options,
       credentials: "include", // send httpOnly refresh token cookie
       headers: {
-        "Content-Type": "application/json",
+        // Don't set Content-Type for FormData — browser sets it with the correct boundary
+        ...(isFormData ? {} : { "Content-Type": "application/json" }),
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
         ...(options.headers || {}),
       },
