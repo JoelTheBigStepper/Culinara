@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { getRecipeById, updateRecipe } from "../utils/api";
-import { uploadImageToCloudinary } from "../utils/cloudinary";
+import { useAuth } from "../../context/AuthContext";
+import { getRecipeById, updateRecipe } from "../../utils/api";
+import { uploadImageToCloudinary } from "../../utils/cloudinary";
 
 export default function EditRecipe() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
 
   const [recipe, setRecipe] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -16,13 +18,12 @@ export default function EditRecipe() {
   useEffect(() => {
     const fetchRecipe = async () => {
       try {
-        const res = await getRecipeById(id);
-
-        const currentUser = JSON.parse(localStorage.getItem("currentUser"));
-        if (!currentUser || String(res.userId) !== String(currentUser.id)) {
+        const data = await getRecipeById(id);
+        const ownerId = data.userId?._id || data.userId;
+        if (!user || String(ownerId) !== String(user._id)) {
           setUnauthorized(true);
         } else {
-          setRecipe(res);
+          setRecipe(data);
         }
       } catch (err) {
         console.error("Failed to fetch recipe:", err);
@@ -32,19 +33,34 @@ export default function EditRecipe() {
       }
     };
 
-    fetchRecipe();
-  }, [id]);
-
+    if (user !== undefined) fetchRecipe(); // wait for auth to resolve
+  }, [id, user]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setRecipe((prev) => ({ ...prev, [name]: value }));
   };
 
+  const handleArrayChange = (field, index, value) => {
+    const updated = [...(recipe[field] || [])];
+    updated[index] = value;
+    setRecipe((prev) => ({ ...prev, [field]: updated }));
+  };
+
+  const addArrayItem = (field) => {
+    setRecipe((prev) => ({ ...prev, [field]: [...(prev[field] || []), ""] }));
+  };
+
+  const removeArrayItem = (field, index) => {
+    setRecipe((prev) => ({
+      ...prev,
+      [field]: prev[field].filter((_, i) => i !== index),
+    }));
+  };
+
   const handleImageUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
-
     try {
       setUploading(true);
       const url = await uploadImageToCloudinary(file);
@@ -63,14 +79,13 @@ export default function EditRecipe() {
       navigate(`/recipe/${id}`);
     } catch (err) {
       console.error("Update failed:", err);
-      setError("Failed to update recipe.");
+      setError(err.message || "Failed to update recipe.");
     }
   };
 
   if (loading) return <div className="text-center mt-8">Loading...</div>;
-  if (unauthorized)
-    return <div className="text-center text-red-500 mt-8">Unauthorized Access</div>;
-  if (error) return <div className="text-center text-red-500 mt-8">{error}</div>;
+  if (unauthorized) return <div className="text-center text-red-500 mt-8">Unauthorized Access</div>;
+  if (error && !recipe) return <div className="text-center text-red-500 mt-8">{error}</div>;
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-10">
@@ -78,67 +93,169 @@ export default function EditRecipe() {
 
       <form onSubmit={handleSubmit} className="space-y-5">
         {/* Title */}
-        <input
-          name="title"
-          value={recipe.title || ""}
-          onChange={handleChange}
-          className="w-full border px-3 py-2 rounded"
-          placeholder="Recipe Title"
-          required
-        />
+        <div>
+          <label className="block text-sm font-medium mb-1">Title</label>
+          <input
+            name="title"
+            value={recipe.title || ""}
+            onChange={handleChange}
+            className="w-full border px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-red-300"
+            required
+          />
+        </div>
 
         {/* Description */}
-        <textarea
-          name="description"
-          value={recipe.description || ""}
-          onChange={handleChange}
-          className="w-full border px-3 py-2 rounded"
-          rows="4"
-          placeholder="Short description"
-          required
-        />
+        <div>
+          <label className="block text-sm font-medium mb-1">Description</label>
+          <textarea
+            name="description"
+            value={recipe.description || ""}
+            onChange={handleChange}
+            className="w-full border px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-red-300"
+            rows={3}
+            required
+          />
+        </div>
 
         {/* Cuisine */}
-        <input
-          name="cuisine"
-          value={recipe.cuisine || ""}
-          onChange={handleChange}
-          className="w-full border px-3 py-2 rounded"
-          placeholder="Cuisine (e.g., Italian, Nigerian)"
-        />
+        <div>
+          <label className="block text-sm font-medium mb-1">Cuisine</label>
+          <select
+            name="cuisine"
+            value={recipe.cuisine || ""}
+            onChange={handleChange}
+            className="w-full border px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-red-300"
+          >
+            {["Nigerian","Brazilian","Italian","Japanese","Korean","Chinese",
+              "German","Mexican","Greek","Indian","Spanish","Thai","American",
+              "French","Turkish","Other"].map((c) => (
+              <option key={c} value={c}>{c}</option>
+            ))}
+          </select>
+        </div>
 
         {/* Category */}
-        <input
-          name="category"
-          value={recipe.category || ""}
-          onChange={handleChange}
-          className="w-full border px-3 py-2 rounded"
-          placeholder="Category (e.g., Dessert, Breakfast)"
-        />
+        <div>
+          <label className="block text-sm font-medium mb-1">Category</label>
+          <select
+            name="category"
+            value={recipe.category || ""}
+            onChange={handleChange}
+            className="w-full border px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-red-300"
+          >
+            {["Dessert","Breakfast","Lunch","Dinner","Snack","Beverage",
+              "Appetizer","Side Dish","Other"].map((c) => (
+              <option key={c} value={c}>{c}</option>
+            ))}
+          </select>
+        </div>
+
+        {/* Difficulty */}
+        <div>
+          <label className="block text-sm font-medium mb-1">Difficulty</label>
+          <select
+            name="difficulty"
+            value={recipe.difficulty || "beginner"}
+            onChange={handleChange}
+            className="w-full border px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-red-300"
+          >
+            <option value="beginner">Beginner</option>
+            <option value="intermediate">Intermediate</option>
+            <option value="advanced">Advanced</option>
+          </select>
+        </div>
+
+        {/* Prep & Cook Time */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium mb-1">Prep Time</label>
+            <input
+              name="prepTime"
+              value={recipe.prepTime || ""}
+              onChange={handleChange}
+              className="w-full border px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-red-300"
+              placeholder="e.g. 15 mins"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-1">Cook Time</label>
+            <input
+              name="cookTime"
+              value={recipe.cookTime || ""}
+              onChange={handleChange}
+              className="w-full border px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-red-300"
+              placeholder="e.g. 30 mins"
+            />
+          </div>
+        </div>
 
         {/* Ingredients */}
-        <textarea
-          name="ingredients"
-          value={recipe.ingredients || ""}
-          onChange={handleChange}
-          className="w-full border px-3 py-2 rounded"
-          rows="4"
-          placeholder="Ingredients (comma-separated)"
-        />
+        <div>
+          <label className="block text-sm font-medium mb-2">Ingredients</label>
+          {(recipe.ingredients || []).map((ing, index) => (
+            <div key={index} className="flex gap-2 mb-2">
+              <input
+                type="text"
+                value={ing}
+                onChange={(e) => handleArrayChange("ingredients", index, e.target.value)}
+                placeholder={`Ingredient ${index + 1}`}
+                className="flex-1 border px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-red-300"
+              />
+              {recipe.ingredients.length > 1 && (
+                <button
+                  type="button"
+                  onClick={() => removeArrayItem("ingredients", index)}
+                  className="text-red-400 hover:text-red-600 px-2"
+                >
+                  ✕
+                </button>
+              )}
+            </div>
+          ))}
+          <button
+            type="button"
+            onClick={() => addArrayItem("ingredients")}
+            className="text-sm text-red-500 hover:underline"
+          >
+            + Add Ingredient
+          </button>
+        </div>
 
         {/* Steps */}
-        <textarea
-          name="steps"
-          value={recipe.steps || ""}
-          onChange={handleChange}
-          className="w-full border px-3 py-2 rounded"
-          rows="4"
-          placeholder="Steps (separate by line)"
-        />
+        <div>
+          <label className="block text-sm font-medium mb-2">Steps</label>
+          {(recipe.steps || []).map((step, index) => (
+            <div key={index} className="flex gap-2 mb-2">
+              <textarea
+                value={step}
+                onChange={(e) => handleArrayChange("steps", index, e.target.value)}
+                placeholder={`Step ${index + 1}`}
+                className="flex-1 border px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-red-300"
+                rows={2}
+              />
+              {recipe.steps.length > 1 && (
+                <button
+                  type="button"
+                  onClick={() => removeArrayItem("steps", index)}
+                  className="text-red-400 hover:text-red-600 px-2 self-start mt-1"
+                >
+                  ✕
+                </button>
+              )}
+            </div>
+          ))}
+          <button
+            type="button"
+            onClick={() => addArrayItem("steps")}
+            className="text-sm text-red-500 hover:underline"
+          >
+            + Add Step
+          </button>
+        </div>
 
         {/* Image Upload */}
         <div>
-          <label className="block font-medium mb-1">Recipe Image</label>
+          <label className="block text-sm font-medium mb-1">Recipe Image</label>
           {recipe.image && (
             <img
               src={recipe.image}
@@ -147,19 +264,17 @@ export default function EditRecipe() {
             />
           )}
           <input type="file" accept="image/*" onChange={handleImageUpload} />
-          {uploading && <p className="text-sm text-gray-500">Uploading...</p>}
+          {uploading && <p className="text-sm text-gray-500 mt-1">Uploading...</p>}
         </div>
 
-        {/* Error Message */}
         {error && <p className="text-red-500 text-center">{error}</p>}
 
-        {/* Submit Button */}
         <button
           type="submit"
           disabled={uploading}
-          className="bg-blue-600 hover:bg-blue-700 text-white w-full py-2 rounded transition"
+          className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded transition disabled:opacity-50"
         >
-          {uploading ? "Saving..." : "Update Recipe"}
+          {uploading ? "Uploading image..." : "Update Recipe"}
         </button>
       </form>
     </div>

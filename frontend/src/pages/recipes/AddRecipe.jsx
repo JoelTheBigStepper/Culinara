@@ -1,56 +1,13 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import {
-  SortableContext,
-  verticalListSortingStrategy,
-  useSortable,
-} from "@dnd-kit/sortable";
-import { CSS } from "@dnd-kit/utilities";
-import { getCurrentUser } from "../../utils/authUtils";
+import { useAuth } from "../../context/AuthContext";
 import { addRecipe } from "../../utils/api";
 import { uploadImageToCloudinary } from "../../utils/cloudinary";
 
-// 🔹 Sortable input field
-function SortableItem({ id, value, onChange, placeholder }) {
-  const { attributes, listeners, setNodeRef, transform, transition } =
-    useSortable({ id });
-  const style = { transform: CSS.Transform.toString(transform), transition };
-
-  return (
-    <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
-      <input
-        type="text"
-        value={value}
-        onChange={(e) => onChange(id, e.target.value)}
-        placeholder={placeholder}
-        className="w-full border rounded px-4 py-2 mb-2"
-        required
-      />
-    </div>
-  );
-}
-
-// 🔹 Sortable textarea
-function SortableTextarea({ id, value, onChange, placeholder }) {
-  const { attributes, listeners, setNodeRef, transform, transition } =
-    useSortable({ id });
-  const style = { transform: CSS.Transform.toString(transform), transition };
-
-  return (
-    <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
-      <textarea
-        value={value}
-        onChange={(e) => onChange(id, e.target.value)}
-        placeholder={placeholder}
-        className="w-full border rounded px-4 py-2 mb-2"
-        required
-      />
-    </div>
-  );
-}
-
 export default function AddRecipe() {
   const navigate = useNavigate();
+  const { user } = useAuth();
+
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [image, setImage] = useState(null);
@@ -59,12 +16,11 @@ export default function AddRecipe() {
   const [steps, setSteps] = useState([""]);
   const [prepTime, setPrepTime] = useState("");
   const [cookTime, setCookTime] = useState("");
-  const [difficulty, setDifficulty] = useState("easy");
+  const [difficulty, setDifficulty] = useState("beginner");
   const [cuisine, setCuisine] = useState("Nigerian");
   const [category, setCategory] = useState("Dessert");
   const [loading, setLoading] = useState(false);
 
-  // Handle image preview
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -87,11 +43,18 @@ export default function AddRecipe() {
     setSteps(updated);
   };
 
+  const removeIngredient = (index) => {
+    setIngredients(ingredients.filter((_, i) => i !== index));
+  };
+
+  const removeStep = (index) => {
+    setSteps(steps.filter((_, i) => i !== index));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const currentUser = getCurrentUser();
-    if (!currentUser) {
+    if (!user) {
       alert("You must be signed in to add a recipe.");
       return navigate("/signin");
     }
@@ -104,12 +67,10 @@ export default function AddRecipe() {
         imageUrl = await uploadImageToCloudinary(imageFile);
       }
 
-      // ✅ Match exact MockAPI schema
       const newRecipe = {
         title: title.trim(),
         image: imageUrl || "",
         description: description.trim(),
-        createdAt: new Date(),
         ingredients: ingredients.filter((i) => i.trim() !== ""),
         steps: steps.filter((s) => s.trim() !== ""),
         prepTime: prepTime.trim(),
@@ -117,19 +78,15 @@ export default function AddRecipe() {
         difficulty,
         cuisine,
         category,
-        userId: String(currentUser.id),
+        // userId comes from JWT on the backend — no need to send it
       };
 
-      console.log("📤 Sending recipe to /recipe endpoint:", newRecipe);
-
-      const response = await addRecipe(newRecipe);
-      console.log("✅ Recipe added:", response.data);
-
+      await addRecipe(newRecipe);
       alert("Recipe added successfully!");
-      navigate("/recipes/new");
+      navigate("/recipes/my-recipes");
     } catch (error) {
-      console.error("❌ Error adding recipe:", error.response?.data || error);
-      alert("Error adding recipe. Check console for details.");
+      console.error("❌ Error adding recipe:", error);
+      alert(error.message || "Error adding recipe.");
     } finally {
       setLoading(false);
     }
@@ -142,30 +99,31 @@ export default function AddRecipe() {
       <form className="space-y-6" onSubmit={handleSubmit}>
         {/* Title */}
         <div>
-          <label className="block text-sm font-medium">Title</label>
+          <label className="block text-sm font-medium mb-1">Title</label>
           <input
             type="text"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            className="w-full border rounded px-4 py-2"
+            className="w-full border rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-red-300"
             required
           />
         </div>
 
         {/* Description */}
         <div>
-          <label className="block text-sm font-medium">Description</label>
+          <label className="block text-sm font-medium mb-1">Description</label>
           <textarea
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            className="w-full border rounded px-4 py-2"
+            className="w-full border rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-red-300"
+            rows={3}
             required
           />
         </div>
 
         {/* Image Upload */}
         <div>
-          <label className="block text-sm font-medium">Image Upload</label>
+          <label className="block text-sm font-medium mb-1">Image</label>
           <input type="file" accept="image/*" onChange={handleImageChange} />
           {image && (
             <img
@@ -179,20 +137,26 @@ export default function AddRecipe() {
         {/* Ingredients */}
         <div>
           <label className="block text-sm font-medium mb-2">Ingredients</label>
-          <SortableContext
-            items={ingredients.map((_, i) => i)}
-            strategy={verticalListSortingStrategy}
-          >
-            {ingredients.map((ing, index) => (
-              <SortableItem
-                key={index}
-                id={index}
+          {ingredients.map((ing, index) => (
+            <div key={index} className="flex gap-2 mb-2">
+              <input
+                type="text"
                 value={ing}
-                onChange={updateIngredient}
+                onChange={(e) => updateIngredient(index, e.target.value)}
                 placeholder={`Ingredient ${index + 1}`}
+                className="flex-1 border rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-red-300"
               />
-            ))}
-          </SortableContext>
+              {ingredients.length > 1 && (
+                <button
+                  type="button"
+                  onClick={() => removeIngredient(index)}
+                  className="text-red-400 hover:text-red-600 px-2"
+                >
+                  ✕
+                </button>
+              )}
+            </div>
+          ))}
           <button
             type="button"
             onClick={() => setIngredients([...ingredients, ""])}
@@ -205,20 +169,26 @@ export default function AddRecipe() {
         {/* Steps */}
         <div>
           <label className="block text-sm font-medium mb-2">Steps</label>
-          <SortableContext
-            items={steps.map((_, i) => i)}
-            strategy={verticalListSortingStrategy}
-          >
-            {steps.map((step, index) => (
-              <SortableTextarea
-                key={index}
-                id={index}
+          {steps.map((step, index) => (
+            <div key={index} className="flex gap-2 mb-2">
+              <textarea
                 value={step}
-                onChange={updateStep}
+                onChange={(e) => updateStep(index, e.target.value)}
                 placeholder={`Step ${index + 1}`}
+                className="flex-1 border rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-red-300"
+                rows={2}
               />
-            ))}
-          </SortableContext>
+              {steps.length > 1 && (
+                <button
+                  type="button"
+                  onClick={() => removeStep(index)}
+                  className="text-red-400 hover:text-red-600 px-2 self-start mt-1"
+                >
+                  ✕
+                </button>
+              )}
+            </div>
+          ))}
           <button
             type="button"
             onClick={() => setSteps([...steps, ""])}
@@ -228,37 +198,37 @@ export default function AddRecipe() {
           </button>
         </div>
 
-        {/* Time & Difficulty */}
+        {/* Prep & Cook Time */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium">Prep Time</label>
+            <label className="block text-sm font-medium mb-1">Prep Time</label>
             <input
               type="text"
               value={prepTime}
               onChange={(e) => setPrepTime(e.target.value)}
-              className="w-full border rounded px-4 py-2"
-              placeholder="e.g., 15 mins"
+              className="w-full border rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-red-300"
+              placeholder="e.g. 15 mins"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium">Cook Time</label>
+            <label className="block text-sm font-medium mb-1">Cook Time</label>
             <input
               type="text"
               value={cookTime}
               onChange={(e) => setCookTime(e.target.value)}
-              className="w-full border rounded px-4 py-2"
-              placeholder="e.g., 30 mins"
+              className="w-full border rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-red-300"
+              placeholder="e.g. 30 mins"
             />
           </div>
         </div>
 
         {/* Difficulty */}
         <div>
-          <label className="block text-sm font-medium">Difficulty</label>
+          <label className="block text-sm font-medium mb-1">Difficulty</label>
           <select
             value={difficulty}
             onChange={(e) => setDifficulty(e.target.value)}
-            className="w-full border rounded px-4 py-2"
+            className="w-full border rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-red-300"
           >
             <option value="beginner">Beginner</option>
             <option value="intermediate">Intermediate</option>
@@ -268,56 +238,39 @@ export default function AddRecipe() {
 
         {/* Cuisine */}
         <div>
-          <label className="block text-sm font-medium">Cuisine</label>
+          <label className="block text-sm font-medium mb-1">Cuisine</label>
           <select
             value={cuisine}
             onChange={(e) => setCuisine(e.target.value)}
-            className="w-full border rounded px-4 py-2"
+            className="w-full border rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-red-300"
           >
-            <option value="Nigerian">Nigerian</option>
-            <option value="Brazilian">Brazilian</option>
-            <option value="Italian">Italian</option>
-            <option value="Japanese">Japanese</option>
-            <option value="Korean">Korean</option>
-            <option value="Chinese">Chinese</option>
-            <option value="German">German</option>
-            <option value="Mexican">Mexican</option>
-            <option value="Greek">Greek</option>
-            <option value="Indian">Indian</option>
-            <option value="Spanish">Spanish</option>
-            <option value="Thai">Thai</option>
-            <option value="American">American</option>
-            <option value="French">French</option>
-            <option value="Turkish">Turkish</option>
-            <option value="Other">Other</option>
+            {["Nigerian","Brazilian","Italian","Japanese","Korean","Chinese",
+              "German","Mexican","Greek","Indian","Spanish","Thai","American",
+              "French","Turkish","Other"].map((c) => (
+              <option key={c} value={c}>{c}</option>
+            ))}
           </select>
         </div>
 
         {/* Category */}
         <div>
-          <label className="block text-sm font-medium">Category</label>
+          <label className="block text-sm font-medium mb-1">Category</label>
           <select
             value={category}
             onChange={(e) => setCategory(e.target.value)}
-            className="w-full border rounded px-4 py-2"
+            className="w-full border rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-red-300"
           >
-            <option value="Dessert">Dessert</option>
-            <option value="Breakfast">Breakfast</option>
-            <option value="Lunch">Lunch</option>
-            <option value="Dinner">Dinner</option>
-            <option value="Snack">Snack</option>
-            <option value="Beverage">Beverage</option>
-            <option value="Appetizer">Appetizer</option>
-            <option value="Side Dish">Side Dish</option>
-            <option value="Other">Other</option>
+            {["Dessert","Breakfast","Lunch","Dinner","Snack","Beverage",
+              "Appetizer","Side Dish","Other"].map((c) => (
+              <option key={c} value={c}>{c}</option>
+            ))}
           </select>
         </div>
 
-        {/* Submit Button */}
         <button
           type="submit"
           disabled={loading}
-          className="w-full sm:w-auto px-6 py-3 bg-red-500 text-white rounded hover:bg-red-700"
+          className="w-full sm:w-auto px-6 py-3 bg-red-500 text-white rounded hover:bg-red-700 disabled:opacity-50 transition"
         >
           {loading ? "Submitting..." : "Submit Recipe"}
         </button>
