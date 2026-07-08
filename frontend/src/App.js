@@ -1,5 +1,6 @@
 import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
-// import {  useState } from "react";
+
+import { AuthProvider } from "./context/AuthContext";
 
 import Splash from "./pages/Splash";
 import Home from "./pages/Home";
@@ -30,10 +31,8 @@ function Layout() {
   const isSplash = path === "/";
 
   return (
-    <div className="">
+    <div>
       {!isSplash && !isAuthPage && <Header />}
-
-
       <Routes>
         <Route path="/" element={<Splash />} />
         <Route path="/home" element={<Home />} />
@@ -59,8 +58,10 @@ function Layout() {
 
 export default function App() {
   return (
-    <Router>
-      <Layout />
-    </Router>
+    <AuthProvider>
+      <Router>
+        <Layout />
+      </Router>
+    </AuthProvider>
   );
 }
