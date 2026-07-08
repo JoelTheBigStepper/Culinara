@@ -1,73 +1,48 @@
 import { useState, useEffect } from "react";
-import { getCurrentUser } from "../utils/authUtils";
-import { getUserFavorites, getAllRecipes, toggleFavorite } from "../utils/api";
+import { useAuth } from "../context/AuthContext";
+import { getFavorites, toggleFavorite } from "../utils/api";
 import RecipeCard from "../components/RecipeCard";
 
 export default function Favorites() {
+  const { user } = useAuth();
   const [favoriteRecipes, setFavoriteRecipes] = useState([]);
   const [loading, setLoading] = useState(true);
-  const currentUser = getCurrentUser();
 
   useEffect(() => {
-    const fetchFavorites = async () => {
-      if (!currentUser) {
-        setFavoriteRecipes([]);
-        setLoading(false);
-        return;
-      }
+    if (!user) { setLoading(false); return; }
+    getFavorites()
+      .then(setFavoriteRecipes)
+      .catch(console.error)
+      .finally(() => setLoading(false));
+  }, [user]);
 
-      try {
-        const userFavorites = await getUserFavorites(currentUser.id);
-        const allRecipes = await getAllRecipes();
-        const favorites = allRecipes.filter((recipe) =>
-          userFavorites.includes(recipe.id)
-        );
-        setFavoriteRecipes(favorites);
-      } catch (error) {
-        console.error("Error loading favorites:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchFavorites();
-  }, [currentUser]);
-
-  // ✅ Remove from favorites immediately after unbookmarking
   const handleToggleFavorite = async (recipeId) => {
     try {
-      const updated = await toggleFavorite(currentUser.id, recipeId);
-      const updatedFavorites = favoriteRecipes.filter((r) =>
-        updated.includes(r.id)
+      const updatedIds = await toggleFavorite(recipeId);
+      setFavoriteRecipes((prev) =>
+        prev.filter((r) => updatedIds.map((id) => id.toString()).includes((r._id || r.id).toString()))
       );
-      setFavoriteRecipes(updatedFavorites);
-    } catch (error) {
-      console.error("Error updating favorites:", error);
+    } catch (err) {
+      console.error("Error updating favorites:", err);
     }
   };
 
-  if (!currentUser) {
+  if (!user) {
     return (
       <div className="text-center py-20">
-        <p className="text-lg text-gray-600">
-          Please log in to view your favorite recipes.
-        </p>
+        <p className="text-lg text-gray-600">Please log in to view your favorite recipes.</p>
       </div>
     );
   }
 
   if (loading) {
-    return (
-      <div className="text-center py-20 text-gray-500 text-lg">Loading...</div>
-    );
+    return <div className="text-center py-20 text-gray-500 text-lg">Loading...</div>;
   }
 
   if (favoriteRecipes.length === 0) {
     return (
       <div className="text-center py-20">
-        <p className="text-gray-600 text-lg">
-          You haven't added any recipes to your favorites yet.
-        </p>
+        <p className="text-gray-600 text-lg">You haven't added any recipes to your favorites yet.</p>
       </div>
     );
   }
@@ -78,9 +53,9 @@ export default function Favorites() {
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
         {favoriteRecipes.map((recipe) => (
           <RecipeCard
-            key={recipe.id}
+            key={recipe._id || recipe.id}
             recipe={recipe}
-            onToggleFavorite={() => handleToggleFavorite(recipe.id)}
+            onToggleFavorite={() => handleToggleFavorite(recipe._id || recipe.id)}
           />
         ))}
       </div>
