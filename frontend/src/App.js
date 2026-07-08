@@ -8,7 +8,7 @@ import SignIn from "./pages/SignIn";
 import EditProfile from "./pages/EditProfile";
 import EditRecipe from "./pages/EditRecipe";
 import RecipeDetail from "./pages/recipes/RecipeDetail";
-import AddRecipe from "./pages/AddRecipe";
+import AddRecipe from "./pages/recipes/AddRecipe";
 import MyRecipes from "./pages/recipes/MyRecipes";
 import AllRecipes from "./pages/recipes/AllRecipes";
 import NewRecipes from "./pages/recipes/NewRecipes";

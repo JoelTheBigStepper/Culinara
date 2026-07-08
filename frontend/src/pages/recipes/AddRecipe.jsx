@@ -6,9 +6,9 @@ import {
   useSortable,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { getCurrentUser } from "../utils/authUtils";
-import { addRecipe } from "../utils/api";
-import { uploadImageToCloudinary } from "../utils/cloudinary";
+import { getCurrentUser } from "../../utils/authUtils";
+import { addRecipe } from "../../utils/api";
+import { uploadImageToCloudinary } from "../../utils/cloudinary";
 
 // 🔹 Sortable input field
 function SortableItem({ id, value, onChange, placeholder }) {
