@@ -1,36 +1,31 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { getCurrentUser, updateUser } from "../utils/authUtils";
-import { uploadImageToCloudinary } from "../utils/cloudinary"; // ✅ Import helper
+import { useAuth } from "../context/AuthContext";
+import { uploadImageToCloudinary } from "../utils/cloudinary";
 import toast, { Toaster } from "react-hot-toast";
 
 export default function EditProfile() {
   const navigate = useNavigate();
-  const [form, setForm] = useState({
-    name: "",
-    email: "",
-    password: "",
-    avatar: ""
-  });
+  const { user, updateUser } = useAuth();
+
+  const [form, setForm] = useState({ name: "", password: "", avatar: "" });
   const [uploading, setUploading] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    const currentUser = getCurrentUser();
-    if (!currentUser) return navigate("/signin");
-    setForm(currentUser);
-  }, [navigate]);
+    if (!user) return navigate("/signin");
+    setForm({ name: user.name || "", password: "", avatar: user.avatar || "" });
+  }, [user, navigate]);
 
   const handleChange = async (e) => {
     const { name, value, files } = e.target;
-
-    // ✅ Handle image upload via Cloudinary helper
     if (name === "avatar" && files && files[0]) {
       setUploading(true);
       try {
         const imageUrl = await uploadImageToCloudinary(files[0]);
         setForm((prev) => ({ ...prev, avatar: imageUrl }));
-        toast.success("Avatar uploaded successfully!");
-      } catch (err) {
+        toast.success("Avatar uploaded!");
+      } catch {
         toast.error("Avatar upload failed.");
       } finally {
         setUploading(false);
@@ -40,16 +35,26 @@ export default function EditProfile() {
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (form.password.length < 6) {
+    if (form.password && form.password.length < 6) {
       toast.error("Password must be at least 6 characters.");
       return;
     }
+    setLoading(true);
+    try {
+      // Only send password if user typed one
+      const payload = { name: form.name, avatar: form.avatar };
+      if (form.password) payload.password = form.password;
 
-    updateUser(form);
-    toast.success("Profile updated successfully!");
-    setTimeout(() => navigate("/profile"), 1000);
+      await updateUser(payload);
+      toast.success("Profile updated!");
+      setTimeout(() => navigate("/profile"), 1000);
+    } catch (err) {
+      toast.error(err.message || "Update failed.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -57,11 +62,7 @@ export default function EditProfile() {
       <Toaster position="top-center" />
       <h2 className="text-3xl font-bold mb-6 text-center">Edit Profile</h2>
 
-      <form
-        onSubmit={handleSubmit}
-        className="space-y-5 bg-white p-6 rounded-xl shadow"
-      >
-        {/* Avatar preview */}
+      <form onSubmit={handleSubmit} className="space-y-5 bg-white p-6 rounded-xl shadow">
         {form.avatar && (
           <div className="flex justify-center mb-4">
             <img
@@ -77,7 +78,6 @@ export default function EditProfile() {
           <input
             type="text"
             name="name"
-            placeholder="Full Name"
             value={form.name}
             onChange={handleChange}
             required
@@ -89,23 +89,20 @@ export default function EditProfile() {
           <label className="block font-medium mb-1">Email</label>
           <input
             type="email"
-            name="email"
-            placeholder="Email"
-            value={form.email}
+            value={user?.email || ""}
             disabled
             className="w-full border px-3 py-2 rounded bg-gray-100 cursor-not-allowed"
           />
         </div>
 
         <div>
-          <label className="block font-medium mb-1">Password</label>
+          <label className="block font-medium mb-1">New Password (leave blank to keep current)</label>
           <input
             type="password"
             name="password"
-            placeholder="Password (min 6 chars)"
+            placeholder="Min 6 characters"
             value={form.password}
             onChange={handleChange}
-            required
             className="w-full border px-3 py-2 rounded focus:outline-none focus:ring-2 focus:ring-red-300"
           />
         </div>
@@ -126,10 +123,10 @@ export default function EditProfile() {
         <div className="flex gap-3 mt-4">
           <button
             type="submit"
-            disabled={uploading}
+            disabled={uploading || loading}
             className="bg-red-500 text-white px-4 py-2 rounded w-full hover:bg-red-600 transition disabled:opacity-50"
           >
-            Save Changes
+            {loading ? "Saving..." : "Save Changes"}
           </button>
           <button
             type="button"
