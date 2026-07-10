@@ -3,7 +3,7 @@ import { useParams, Link, useNavigate } from "react-router-dom";
 import { getRecipeById, deleteRecipe, toggleFavorite, getFavoriteIds } from "../../utils/api";
 import { useAuth } from "../../context/AuthContext";
 import {
-  Clock, Users, ChevronRight, Heart, Share2, Bookmark, Edit2, Trash2,
+  Clock, Users, ChevronRight, Share2, Bookmark, Edit2, Trash2,
 } from "lucide-react";
 
 export default function RecipeDetail() {
