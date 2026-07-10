@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { useAuth } from "../../context/AuthContext";
-import { getRecipeById, updateRecipe } from "../../utils/api";
-import { uploadImageToCloudinary } from "../../utils/cloudinary";
+import { useAuth } from "../context/AuthContext";
+import { getRecipeById, updateRecipe } from "../utils/api";
+import { uploadImageToCloudinary } from "../utils/cloudinary";
 
 export default function EditRecipe() {
   const { id } = useParams();

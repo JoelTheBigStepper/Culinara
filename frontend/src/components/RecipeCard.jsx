@@ -45,7 +45,7 @@ export default function RecipeCard({ recipe, onLike }) {
   };
 
   return (
-    <div className="bg-white rounded-xl transition p-2 relative shadow-sm hover:shadow-md">
+    <div className="bg-white rounded-xl transition p-2 relative shadow-lg hover:shadow-md">
       {/* Top-right icons */}
       <div className="absolute top-4 right-4 space-y-2 flex flex-col items-end">
         {onLike && (
